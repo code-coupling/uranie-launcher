@@ -1,0 +1,9 @@
+*.egg-info
+pylint*
+
+# Python byte compiled
+__pycache__/
+*.pyc
+
+# vim swap files
+*.swp
