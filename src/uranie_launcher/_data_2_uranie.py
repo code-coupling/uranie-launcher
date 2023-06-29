@@ -15,15 +15,22 @@ STUDY_OUTFILE_NAME = "aggregated_outputs.dat"
 STUDY_OUTFILE_NAME_FAILED = "aggregated_outputs_failed.dat"
 
 
-def create_data_server():
+def create_data_server(outputs: uncertainty_data.Outputs):
     """Create the data server for Uranie
+
+    Parameters
+    ----------
+    outputs : uncertainty_data.Outputs
+        Object containing the name of the outputs and all the informations about them.
 
     Returns
     -------
     _rootlogon.DataServer.TDataServer
         TDataServer object.
     """
-    return _rootlogon.DataServer.TDataServer("tdsRN", "TDS du Reacteur Numerique")
+
+    title = f"Quantities: {[output.quantity_of_interest for output in outputs.outputs]}"
+    return _rootlogon.DataServer.TDataServer(outputs.name, title)
 
 
 def set_inputs(inputs: uncertainty_data.Inputs, t_data_server: _rootlogon.DataServer.TDataServer):

@@ -68,7 +68,7 @@ class Inputs():
         """
         def __init__(self, lower_bound, upper_bound, mean, standard_deviation):
             super().__init__()
-            self._lower_bound = lower_bound
+            self._lower_bound = lower_bound # TODO test bound order
             self._upper_bound = upper_bound
             self._mean = mean
             self._standard_deviation = standard_deviation
@@ -229,7 +229,7 @@ class Propagation():
 
     def __init__(self, sampling_method: str, sample_size: int):
         if sample_size <= 0:
-            raise ValueError
+            raise ValueError("sample_size must be greater than 0")
 
         self._sampling_method = sampling_method
         self._sample_size = sample_size
@@ -263,15 +263,18 @@ class Outputs():
     class Output:
         """ Class containing all the info about one specific output.
         """
-        def __init__(self, headers: List[str]):
+        def __init__(self, headers: List[str], quantity_of_interest: str):
             """Constructor.
 
             Parameters
             ----------
             headers : List[str]
-                Names of the outputs
+                Names of the aggregation functions applied on the output
+            quantity_of_interest : str
+                Names of the output
             """
             self._headers = headers
+            self._quantity_of_interest = quantity_of_interest
 
         @property
         def headers(self):
@@ -284,8 +287,20 @@ class Outputs():
             """
             return self._headers
 
-    def __init__(self):
+        @property
+        def quantity_of_interest(self):
+            """Returns the name of the quantity of interest
+
+            Returns
+            -------
+            list
+                quantity_of_interest
+            """
+            return self._quantity_of_interest
+
+    def __init__(self, tds_name):
         self._outputs = []
+        self._tds_name = tds_name
 
     def add_output(self, output: 'Outputs.Output'):
         """ Set all the info about one specific output.
@@ -307,3 +322,14 @@ class Outputs():
             outputs
         """
         return self._outputs
+
+    @property
+    def name(self):
+        """Returns the name of the output (bof, pas sur...)
+
+        Returns
+        -------
+        list
+            tds_name
+        """
+        return self._tds_name

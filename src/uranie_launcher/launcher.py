@@ -49,7 +49,7 @@ def execute_uranie(commands_to_execute: Dict[str, List],
         return t_data_server if this function run through its end without crashing.
     """
 
-    t_data_server = d2u.create_data_server()
+    t_data_server = d2u.create_data_server(outputs)
 
     d2u.set_inputs(inputs, t_data_server)
 
