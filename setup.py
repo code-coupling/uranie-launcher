@@ -13,7 +13,7 @@ def get_version():
 
 
 setup(
-    name = "uranie_launcher",
+    name = "uranie-launcher",
     version = get_version(),
     author = "Clément STUTZ",
     author_email = "clement.stutz@cea.fr",
