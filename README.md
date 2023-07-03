@@ -12,7 +12,7 @@
 
 ## Description
 
-The package **uranie_launcher** is a python package for easily launch a study with URANIE.
+The package **uranie_launcher** is a Python package for easily launch a study with URANIE.
 
 ## Installation
 
