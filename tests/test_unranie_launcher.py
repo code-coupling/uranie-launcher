@@ -10,6 +10,7 @@ from uranie_launcher import utils
 from uranie_launcher import _data_2_uranie
 from uranie_launcher import _rootlogon
 from uranie_launcher import _run_unitary
+from . import program_tester
 
 
 # def test_0(program_path, my_test_fun):
@@ -574,16 +575,14 @@ def test_generate_sample_with_sobol(headers):
                                              t_data_server,
                                              Path(output_dirname))
 
-    print("\n")
-    print(dir(_rootlogon.Sampler))
-    print("\n")
-    print(dir(_rootlogon.Sampler.TQMC))
-    print("\n")
-    print(str(sampler.getMethodName))
-    print(str(sampler.getTDS))
+    # print("sampler.printLog() :", sampler.printLog())
 
     assert (
-        isinstance(sampler, _rootlogon.Sampler.TQMC)
+        isinstance(sampler, _rootlogon.Sampler.TQMC) and
+        sampler.getTDS() == t_data_server and
+        sampler.getMethodName() == "qMC_sobol" and
+        sampler.GetName() == f"Sampling_qMC_{sampling_method.lower()}_{sample_size}" and
+        sampler.GetTitle() == f"Uranie {sample_size} sample with qMC method {sampling_method.lower()}"
         #FIXME : Could be a better test...
     )
 
@@ -626,10 +625,14 @@ def test_generate_sample_with_srs(headers):
                                              t_data_server,
                                              Path(output_dirname))
 
-    print(sampler)
+    # print("sampler.printLog() :", sampler.printLog())
 
     assert (
-        isinstance(sampler, _rootlogon.Sampler.TSampling)
+        isinstance(sampler, _rootlogon.Sampler.TSampling) and
+        sampler.getTDS() == t_data_server and
+        sampler.getMethodName() == sampling_method and
+        sampler.GetName() == f"Sampling_{sampling_method.lower()}_{sample_size}" and
+        sampler.GetTitle() == f"Uranie {sample_size} sample with method {sampling_method.lower()}"
         #FIXME : Could be a better test...
     )
 
@@ -781,20 +784,19 @@ def test_create_launcher(headers, commands_to_execute):
 
 
 ## _run_unitary
-# def test_program_tester():
+def test_program_tester():
 
-#     from . import program_tester
-#     data_filename = "./input_for_tests"
-#     output_dirname = "./outputs_for_tests"
+    data_filename = "./input_for_tests"
+    output_dirname = "./results"
 
-#     program_tester.main_unitary_calculation([data_filename, output_dirname])
+    program_tester.main_unitary_calculation([data_filename, output_dirname])
 
-#     output_dir = Path(__file__).absolute().parent / "outputs_for_tests"
+    output_dir = Path(__file__).absolute().parent / output_dirname
 
-#     assert (
-#         output_dir.is_dir() and
-#         False
-#     )
+    assert (
+        output_dir.is_dir()
+        #FIXME : Could be a better test...
+    )
 
 
 # def test_run_unitary():
