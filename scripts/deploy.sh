@@ -63,6 +63,7 @@ function install_uranie_from_src() {
     message "installed uranie-${uranie_version} in ${uranie_install_dir} : done (log file in ${log_file}.log)" $?
 }
 
+root_version='6.24.06'
 # Install root from the archive
 function install_root_from_package() {
     local root_install_dir=$1
@@ -71,6 +72,21 @@ function install_root_from_package() {
     local log_file=${log_dir}/install_root
     ${third_parties_dir}/root/${platform}/extract-root-${root_version}.sh ${root_install_dir} >> ${log_file}.log 2>> ${log_file}.err &
     wait_process $! "extract in ${tmp_dir} ..."
+}
+
+function download_root(){
+    message "---> Downloads root" -1
+    local log_file=${log_dir}/pip_download_root
+    local archive_name=${download_dir}/root/${platform}/root-${root_version}.tar.gz
+    mkdir -p ${download_dir}/root/${platform}
+    if [[ "${platform}" == "centos-7" ]]; then
+        wget https://root.cern/download/root_v${root_version}.Linux-centos7-x86_64-gcc4.8.tar.gz -O ${archive_name} > ${log_file}.log 2> ${log_file}.err &
+        wait_process $! "wget root in ${archive_name} ..."
+        message "done (log file in ${log_file}.log)" $?
+    else
+        message "Download of root on ${platform} not implemented." 1
+    fi
+    _add_extract_script ${archive_name} "root" ${root_version}
 }
 
 function download_uranie(){
@@ -97,22 +113,22 @@ this_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 root_dir="$(dirname ${this_script_dir})"
 work_dir=${PWD}
 
+venv_dir=${this_script_dir}/.venv_utils
+
 uranie_bash_source="/home/uranie-public/uranie-v4.7.0.bashrc"
 
-if [[ -d "${work_dir}/venv" ]]; then
-    if [[ -d "${work_dir}/venv_old" ]]; then
-        rm -rf ${work_dir}/venv_old
+if [[ -d "${venv_dir}" ]]; then
+    if [[ -d "${venv_dir}_old" ]]; then
+        rm -rf ${venv_dir}_old
     fi
-    mv ${work_dir}/venv ${work_dir}/venv_old
+    mv ${venv_dir} ${venv_dir}_old
 fi
 
-python3 -m venv "./venv"
-echo ". ${uranie_bash_source}" >> ./venv/bin/activate
+python3 -m venv "${venv_dir}"
+echo ". ${uranie_bash_source}" >> ${venv_dir}/bin/activate
 
-. ${work_dir}/venv/bin/activate
+. ${venv_dir}/bin/activate
 
 pip install --upgrade pip setuptools
 
 pip install -e ${root_dir}[dev]
-
-echo "do : 'source /home/uranie-public/uranie-v4.7.0.bashrc' befor to execute ib-uranie commande."

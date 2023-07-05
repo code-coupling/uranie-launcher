@@ -149,11 +149,13 @@ def set_outputs(outputs: uncertainty_data.Outputs, unitary_result_filename: str)
     t_output_file = _rootlogon.Launcher.TOutputFileRow(unitary_result_filename)
 
     # The attribute in the output file
+    # FIXME : here, headers is a list containing ALL the headers of all outputs.
+    # May not be a good idea to do so...
     headers = []
     for output in outputs.outputs:
-        for key in output.headers:
-            headers.append(key)
-            t_output_file.addAttribute(_rootlogon.DataServer.TAttribute(key))
+        for header in output.headers:
+            headers.append(header)
+            t_output_file.addAttribute(_rootlogon.DataServer.TAttribute(header))
 
 
     return t_output_file, headers
@@ -196,6 +198,8 @@ def create_launcher(commands_to_execute: Dict[str, List],
 
     uranie_work_dir = output_dirname / STUDY_WORKDIR_NAME
 
+    print(t_data_server)
+    print(t_code)
     t_launcher = _rootlogon.Launcher.TLauncher(t_data_server, t_code)
     # To back up all directories
     t_launcher.setSave()

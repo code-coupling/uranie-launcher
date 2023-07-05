@@ -117,7 +117,7 @@ class Inputs():
             """
             return self._standard_deviation
 
-    class Input:
+    class Input():
         """ Class containing all the info about one specific parameter of the uncertain parameters.
         """
         def __init__(self, variable_name, distribution: 'Inputs.Distribution'):
@@ -260,7 +260,7 @@ class Propagation():
 class Outputs():
     """ Class defining an object containing all the informations about the outputs.
     """
-    class Output:
+    class Output():
         """ Class containing all the info about one specific output.
         """
         def __init__(self, headers: List[str], quantity_of_interest: str):
