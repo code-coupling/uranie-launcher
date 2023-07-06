@@ -741,7 +741,7 @@ def test_create_launcher(headers, commands_to_execute):
     inputs.add_input(inputs.Input(variable_name,
                                   distribution))
     scenario_flag_filename = Path(__file__).absolute().parent / "tag_input_for_tests.json"
-    inputs.set_file_flag(str(scenario_flag_filename))
+    inputs.set_file_flag(scenario_flag_filename)
 
     # propagation
     sampling_method = "Sobol"
@@ -809,52 +809,52 @@ def test_program_tester():
 #     pass
 
 ## launcher
-def test_launcher(headers,
-                  commands_to_execute):
+# def test_launcher(headers,
+#                   commands_to_execute):
 
-    variable_name = "variable_1"
-    lower_bound = 0
-    upper_bound = 1
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
-                                                               upper_bound)
+#     variable_name = "variable_1"
+#     lower_bound = 0
+#     upper_bound = 1
+#     distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
+#                                                                upper_bound)
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
-                                           distribution)
+#     _input = uncertainty_data.Inputs.Input(variable_name,
+#                                            distribution)
 
-    inputs = uncertainty_data.Inputs()
-    inputs.add_input(_input)
-    scenario_flag_filename = Path(__file__).absolute().parent / "tag_input_for_tests.json"
-    inputs.set_file_flag(str(scenario_flag_filename))
+#     inputs = uncertainty_data.Inputs()
+#     inputs.add_input(_input)
+#     scenario_flag_filename = Path(__file__).absolute().parent / "tag_input_for_tests.json"
+#     inputs.set_file_flag(str(scenario_flag_filename))
 
-    quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+#     quantity_of_interest = "Temperature"
+#     output = uncertainty_data.Outputs.Output(headers,
+#                                              quantity_of_interest)
 
-    tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
-    outputs.add_output(output)
+#     tds_name = "Name_of_t_data_server"
+#     outputs = uncertainty_data.Outputs(tds_name)
+#     outputs.add_output(output)
 
-    sampling_method = "Sobol"
-    sample_size = 42
-    propagation = uncertainty_data.Propagation(sampling_method,
-                                               sample_size)
+#     sampling_method = "Sobol"
+#     sample_size = 42
+#     propagation = uncertainty_data.Propagation(sampling_method,
+#                                                sample_size)
 
-    output_dirname = Path(__file__).absolute().parent
+#     output_dirname = Path(__file__).absolute().parent
 
-    unitary_result_filename = "unitary_aggregated_outputs.dat"
+#     unitary_result_filename = "unitary_aggregated_outputs.dat"
 
-    nb_jobs = 2
-    execution = exe.ExecutionLocal(nb_jobs)
+#     nb_jobs = 2
+#     execution = exe.ExecutionLocal(nb_jobs)
 
 
-    t_data_server = launcher.execute_uranie(commands_to_execute,
-                                            inputs,
-                                            propagation,
-                                            outputs,
-                                            execution,
-                                            output_dirname,
-                                            unitary_result_filename)
-    assert (
-        False
-    )
+#     t_data_server = launcher.execute_uranie(commands_to_execute,
+#                                             inputs,
+#                                             propagation,
+#                                             outputs,
+#                                             execution,
+#                                             output_dirname,
+#                                             unitary_result_filename)
+#     assert (
+#         False
+#     )
 

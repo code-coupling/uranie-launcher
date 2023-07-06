@@ -1,5 +1,6 @@
 """ Class used to set uncertainty data into an understandable format for uranie_launcher.
 """
+from pathlib import Path
 from typing import List
 
 class Inputs():
@@ -193,13 +194,13 @@ class Inputs():
         """
         return self._inputs
 
-    def set_file_flag(self, file_flag: str):
+    def set_file_flag(self, file_flag: Path):
         """ Set the name of the file containing the balise_flag which will be replaced
         by a specific value depending on the chosen distribution.
 
         Parameters
         ----------
-        file_flag : str
+        file_flag : Path
             Should be something like : <file_name>_Balise.<ext>
         """
         self._file_flag = file_flag

@@ -68,7 +68,7 @@ def set_inputs(inputs: uncertainty_data.Inputs, t_data_server: _rootlogon.DataSe
             raise ValueError("Invalid distribution type: "
                              f"{_input.distribution.__class__.__name__}")
 
-        t_data_server.getAttribute(variable_name).setFileFlag(inputs.file_flag, _input.flag)
+        t_data_server.getAttribute(variable_name).setFileFlag(str(inputs.file_flag), _input.flag)
 
 
 def generate_sample(propagation: uncertainty_data.Propagation,
