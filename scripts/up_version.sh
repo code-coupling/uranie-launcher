@@ -46,6 +46,8 @@ done
 # Work in venv
 if [ ! -d "${current_script_dir}/.venv_utils" ]; then
     python3 -m venv ${current_script_dir}/.venv_utils
+    uranie_bash_source="/home/uranie-public/uranie-v4.7.0.bashrc"
+    echo ". ${uranie_bash_source}" >> ${current_script_dir}/.venv_utils/bin/activate
 fi
 . ${current_script_dir}/.venv_utils/bin/activate
 pip install --upgrade pip setuptools tox
