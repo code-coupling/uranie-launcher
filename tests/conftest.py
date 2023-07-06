@@ -102,24 +102,12 @@ def t_output_file():
 @pytest.fixture(name='commands_to_execute', scope='session')
 def commands_to_execute_fixture():
 
-    # commands_to_execute = {
-    #     "test-run-unitary-calculation" : [
-    #         "./tag_input_for_tests",
-    #         "./outputs_for_tests",
-    #         ],
-    #     }
-
     commands_to_execute = {
-        "ib-run": [
-            "./uranie_tag_input.xml",
-            "./ib_run_outputs"
-        ],
-        "uranie-post-process": [
-            "./ib_run_outputs",
-            "/home/catB/cs270042/travail/reacteur_numerique/merge_de_uncertainties_vers_uncertainties_uranie/resultats_5/input.xml",
-            "./unitary_aggregated_outputs.dat"
-        ]
-    }
+        "test-run-unitary-calculation" : [
+            "./input_for_tests",
+            "./results",
+            ],
+        }
 
     return commands_to_execute
 

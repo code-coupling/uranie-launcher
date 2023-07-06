@@ -54,7 +54,8 @@ def main_unitary_calculation(arguments):
 
     result = _do_calculation(uncertain_variable)
 
-    output_filename = args.output_dirname + "/result"
+    output_dirname = Path(__file__).absolute().parent / args.output_dirname
+    output_filename = output_dirname / "result"
     _write_result(result, output_filename)
 
     return 0
