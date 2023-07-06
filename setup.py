@@ -24,7 +24,7 @@ setup(
     version=get_version(),
     author="Clément STUTZ",
     author_email="clement.stutz@cea.fr",
-    description="Uranie launcher for your own calculation scripts",
+    description="uranie-launcher help you to run your calculation scripts with Uranie",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     package_dir={"": "src"},
