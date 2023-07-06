@@ -198,8 +198,6 @@ def create_launcher(commands_to_execute: Dict[str, List],
 
     uranie_work_dir = output_dirname / STUDY_WORKDIR_NAME
 
-    print(t_data_server)
-    print(t_code)
     t_launcher = _rootlogon.Launcher.TLauncher(t_data_server, t_code)
     # To back up all directories
     t_launcher.setSave()
@@ -232,12 +230,12 @@ def run_calculations(execution: exe.Execution,
                 t_launcher.setVarDraw("max:initial_power","","") # FIXME lie a integration_bench
         t_launcher.run(f"localhost={execution.nb_jobs}")
 
-    elif isinstance(execution, exe.ExecutionSlurm):
-        pass
-        #sbatch -n <nb de tâches> -c <nb de cœurs par tâche> -p <partition> --qos=<qos>
-        # -A <account> -t <walltime HH:MM:SS> -J <jobname> -o <fichier de sortie>
-        # -e <fichier d’erreur> --mail-user=<email> --mail-type=<BEGIN|END|FAIL|ALL>
-        # -w <liste des nœuds> myscript.sh
+    # elif isinstance(execution, exe.ExecutionSlurm):
+    #     pass
+    #     #sbatch -n <nb de tâches> -c <nb de cœurs par tâche> -p <partition> --qos=<qos>
+    #     # -A <account> -t <walltime HH:MM:SS> -J <jobname> -o <fichier de sortie>
+    #     # -e <fichier d’erreur> --mail-user=<email> --mail-type=<BEGIN|END|FAIL|ALL>
+    #     # -w <liste des nœuds> myscript.sh
     else:
         raise ValueError(f"Invalid execution mode: {execution.__class__.__name__}")
 

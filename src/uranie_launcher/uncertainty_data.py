@@ -28,8 +28,11 @@ class Inputs():
         """
         def __init__(self, lower_bound, upper_bound):
             super().__init__()
-            self._lower_bound = lower_bound
-            self._upper_bound = upper_bound
+            if lower_bound < upper_bound:
+                self._lower_bound = lower_bound
+                self._upper_bound = upper_bound
+            else:
+                raise ValueError("The upper bound have to be greater than the lower one !")
 
         @property
         def lower_bound(self):
@@ -69,10 +72,13 @@ class Inputs():
         """
         def __init__(self, lower_bound, upper_bound, mean, standard_deviation):
             super().__init__()
-            self._lower_bound = lower_bound # TODO test bound order
-            self._upper_bound = upper_bound
-            self._mean = mean
-            self._standard_deviation = standard_deviation
+            if lower_bound < upper_bound:
+                self._lower_bound = lower_bound
+                self._upper_bound = upper_bound
+                self._mean = mean
+                self._standard_deviation = standard_deviation
+            else:
+                raise ValueError("The upper bound have to be greater than the lower one !")
 
         @property
         def lower_bound(self):
