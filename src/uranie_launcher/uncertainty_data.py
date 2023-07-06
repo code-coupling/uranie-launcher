@@ -127,7 +127,7 @@ class Inputs():
     class Input():
         """ Class containing all the info about one specific parameter of the uncertain parameters.
         """
-        def __init__(self, variable_name, distribution: 'Inputs.Distribution'):
+        def __init__(self, variable_name: str, distribution: 'Inputs.Distribution'):
             """ Set all the info about one specific parameter of the uncertain parameters.
 
             Parameters

@@ -1,6 +1,7 @@
 
 import pytest
 from pathlib import Path
+import sys
 from uranie_launcher import uncertainty_data
 from uranie_launcher import _data_2_uranie
 from uranie_launcher import _rootlogon
@@ -103,7 +104,8 @@ def t_output_file():
 def commands_to_execute_fixture():
 
     commands_to_execute = {
-        "test-run-unitary-calculation" : [
+        sys.executable : [
+             str(Path(__file__).parent / "program_tester.py"),
             "./input_for_tests",
             "./results",
             ],
