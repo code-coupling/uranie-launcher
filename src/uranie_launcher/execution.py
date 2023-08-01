@@ -1,21 +1,67 @@
 """Class used to set execution info into an understandable format for uranie_launcher.
 """
+from pathlib import Path
+
+
 class Execution:
     """ Parent class of classes describing how to execute the calculations.
     """
-    def __init__(self) -> None:
+    def __init__(self, working_directory: Path) -> None:
+        """Constructor.
+
+        Parameters
+        ----------
+        working_directory : Path
+            Path to the working directory of Uranie Launcher.
+        """
+        self._working_directory = working_directory
         self._visualization = False
+        self._clean = True
+        self._save = -1
 
     @property
-    def visualization(self):
+    def working_directory(self) -> Path:
+        """Path to the working directory of Uranie Launcher.
+
+        Returns
+        -------
+        Path
+            Path to the directory
+        """
+        return self._working_directory
+
+    @property
+    def visualization(self) -> bool:
         """Get the visialisation status
 
         Returns
         -------
         bool
-            self._visualization
+            Enabled if True
         """
         return self._visualization
+
+    @property
+    def clean(self) -> bool:
+        """Get the cleanning status
+
+        Returns
+        -------
+        bool
+            Enabled if True
+        """
+        return self._clean
+
+    @property
+    def save(self) -> int:
+        """Get the saving status
+
+        Returns
+        -------
+        bool
+            Enabled if True
+        """
+        return self._save
 
     def enable_visualization(self, enable: bool = True):
         """To enable/disable visualization
@@ -27,11 +73,73 @@ class Execution:
         """
         self._visualization = enable
 
+    def clean_outputs(self, enable: bool = True):
+        """To enable/disable cleanning
+
+        From Uranie documentation: set the clean flag to the value true or false. If it is set to
+        True, all the working directories are cleaned before launching. Then if the save flag is
+        set to True, the working directories are cleaned a second time after the TLauncher run.
+        If not specified, default parameter is kTrue, which means the working directory will be
+        cleaned (i.e. temporary folders will be erased)
+
+        Parameters
+        ----------
+        enable : bool, optional
+            True to enable, by default True
+        """
+        self._clean = enable
+
+    def save_outputs(self, enable: int = -1):
+        """To enable/disable saving
+
+        From Uranie documentation: activate the save mode and set the maximum number i of
+        folders to be kept. A positive value for i stands for the explicit maximum number of saves,
+        while no value or -1 value allow to keep all the patterns (all patterns are launched in a
+        different working directory UranieLauncher_i). Default parameter is -1.
+        If setSave is not called, the temporary output folders of the code will be overwritten at
+        each computing step, while they will be left unmodified if the method is called.
+
+        Example
+        -------
+        >>> mylauncher.setSave() # will save each launch
+        >>> mylauncher.setSave(-1) # will save each launch
+        >>> mylauncher.setSave(10) # will save 10 launches
+
+        Warning
+        -------
+        In case of multi-process distributed computation, in order to prevent all the processes
+        from trying and accessing the same data at the same time, a call to the setSave method is
+        mandatory. As a consequence, if it is not manually set, Uranie will set it automatically
+
+        Parameters
+        ----------
+        enable : int, optional
+            True to enable, by default -1
+        """
+        self._save = enable
+
+
 class ExecutionLocal(Execution):
     """Object containing the info about how to execute the calculations on a desktop.
     """
-    def __init__(self, nb_jobs: int) -> None:
-        super().__init__()
+    def __init__(self, working_directory: Path, nb_jobs: int = 1) -> None:
+        """Constructor.
+
+        Parameters
+        ----------
+        working_directory : Path
+            Path to the working directory of Uranie Launcher.
+        nb_jobs : int, optional
+            Number of parallel executions, by default 1.
+
+        Raises
+        ------
+        ValueError
+            'nb_jobs' must be >=1.
+        """
+        super().__init__(working_directory=working_directory)
+        if nb_jobs < 1:
+            raise ValueError(f"'nb_jobs' ({nb_jobs}) must be >=1.")
         self._nb_jobs = nb_jobs
 
     @property
@@ -41,7 +149,7 @@ class ExecutionLocal(Execution):
         Returns
         -------
         int
-            self._nb_jobs
+            value >0
         """
         return self._nb_jobs
 

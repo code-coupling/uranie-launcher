@@ -1,4 +1,4 @@
-""" Class used to set uncertainty data into an understandable format for uranie_launcher.
+""" Module used to set uncertainty data into an understandable format for uranie_launcher.
 """
 from pathlib import Path
 from typing import List
@@ -35,7 +35,7 @@ class Inputs():
                 raise ValueError("The upper bound have to be greater than the lower one !")
 
         @property
-        def lower_bound(self):
+        def lower_bound(self) -> float:
             """Returns info about the distribution
 
             Returns
@@ -46,7 +46,7 @@ class Inputs():
             return self._lower_bound
 
         @property
-        def upper_bound(self):
+        def upper_bound(self) -> float:
             """Returns info about the distribution
 
             Returns
@@ -81,7 +81,7 @@ class Inputs():
                 raise ValueError("The upper bound have to be greater than the lower one !")
 
         @property
-        def lower_bound(self):
+        def lower_bound(self) -> float:
             """Returns all info about the distribution
 
             Returns
@@ -92,7 +92,7 @@ class Inputs():
             return self._lower_bound
 
         @property
-        def upper_bound(self):
+        def upper_bound(self) -> float:
             """Returns all info about the distribution
 
             Returns
@@ -103,7 +103,7 @@ class Inputs():
             return self._upper_bound
 
         @property
-        def mean(self):
+        def mean(self) -> float:
             """Returns all info about the distribution
 
             Returns
@@ -114,7 +114,7 @@ class Inputs():
             return self._mean
 
         @property
-        def standard_deviation(self):
+        def standard_deviation(self) -> float:
             """Returns all info about the distribution
 
             Returns
@@ -127,7 +127,7 @@ class Inputs():
     class Input():
         """ Class containing all the info about one specific parameter of the uncertain parameters.
         """
-        def __init__(self, variable_name: str, distribution: 'Inputs.Distribution'):
+        def __init__(self, variable_name : str, distribution: 'Inputs.Distribution'):
             """ Set all the info about one specific parameter of the uncertain parameters.
 
             Parameters
@@ -142,7 +142,7 @@ class Inputs():
             self._flag_delimiter = '@'
 
         @property
-        def variable_name(self):
+        def variable_name(self) -> str:
             """Returns the name of the uncertain value
 
             Returns
@@ -153,18 +153,18 @@ class Inputs():
             return self._variable_name
 
         @property
-        def distribution(self):
+        def distribution(self) -> 'Inputs.Distribution':
             """Returns all info about the distribution
 
             Returns
             -------
-            list
+            'Inputs.Distribution'
                 distribution
             """
             return self._distribution
 
         @property
-        def flag(self):
+        def flag(self) -> str:
             """Returns the flag
 
             Returns
@@ -190,7 +190,7 @@ class Inputs():
         self._inputs.append(_input)
 
     @property
-    def inputs(self):
+    def inputs(self) -> List[Input]:
         """Returns the _inputs list that contains all info about each uncertain parameter
 
         Returns
@@ -212,7 +212,7 @@ class Inputs():
         self._file_flag = file_flag
 
     @property
-    def file_flag(self):
+    def file_flag(self) -> str:
         """Returns the name of the file containing the balise
 
         Returns
@@ -242,7 +242,7 @@ class Propagation():
         self._sample_size = sample_size
 
     @property
-    def sampling_method(self):
+    def sampling_method(self) -> str:
         """Returns the sampling method
 
         Returns
@@ -253,7 +253,7 @@ class Propagation():
         return self._sampling_method
 
     @property
-    def sample_size(self):
+    def sample_size(self) -> int:
         """Get the sample size variable
 
         Returns
@@ -270,7 +270,7 @@ class Outputs():
     class Output():
         """ Class containing all the info about one specific output.
         """
-        def __init__(self, headers: List[str], quantity_of_interest: str):
+        def __init__(self, headers: List[str], quantity_of_interest: str, filename: str):
             """Constructor.
 
             Parameters
@@ -279,12 +279,15 @@ class Outputs():
                 Names of the aggregation functions applied on the output
             quantity_of_interest : str
                 Names of the output
+            filename : str
+                Name of the output file, if any
             """
             self._headers = headers
             self._quantity_of_interest = quantity_of_interest
+            self._filename = filename
 
         @property
-        def headers(self):
+        def headers(self) -> List[str]:
             """Returns the dictionary containing all the chosen aggregation functions
 
             Returns
@@ -295,19 +298,31 @@ class Outputs():
             return self._headers
 
         @property
-        def quantity_of_interest(self):
+        def quantity_of_interest(self) -> str:
             """Returns the name of the quantity of interest
 
             Returns
             -------
-            list
+            str
                 quantity_of_interest
             """
             return self._quantity_of_interest
 
-    def __init__(self, tds_name):
+        @property
+        def filename(self) -> str:
+            """Returns the name of the output file, if any
+
+            Returns
+            -------
+            str
+                file name
+            """
+            return self._filename
+
+
+    def __init__(self, name):
         self._outputs = []
-        self._tds_name = tds_name
+        self._name = name
 
     def add_output(self, output: 'Outputs.Output'):
         """ Set all the info about one specific output.
@@ -331,12 +346,45 @@ class Outputs():
         return self._outputs
 
     @property
-    def name(self):
-        """Returns the name of the output (bof, pas sur...)
+    def name(self) -> str:
+        """Returns the name of the output
 
         Returns
         -------
-        list
+        str
             tds_name
         """
-        return self._tds_name
+        return self._name
+
+    @property
+    def experimental_design_filename(self) -> str:
+        """Returns the name of the experimental design file
+
+        Returns
+        -------
+        str
+            ``self.name+'_exp_design.dat')``
+        """
+        return f"{self.name}_exp_design.dat"
+
+    @property
+    def output_filename(self) -> str:
+        """Returns the name of the output file
+
+        Returns
+        -------
+        str
+            ``self.name+'_output.dat')``
+        """
+        return f"{self.name}_output.dat"
+
+    @property
+    def failed_filename(self) -> str:
+        """Returns the name of the failed file
+
+        Returns
+        -------
+        str
+            ``self.name+'_failed.dat')``
+        """
+        return f"{self.name}_failed.dat"

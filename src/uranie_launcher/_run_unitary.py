@@ -28,33 +28,35 @@ def main_unitary(arguments):
     parser.add_argument(
         "commands_json_file",
         help = "Name of the script or the command to execute")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="activate debug mode (default: %(default)s)")
     args = parser.parse_args(arguments)
+
+    utils.set_verbosity(utils.DEBUG if args.debug else utils.INFO)
 
     with open(args.commands_json_file, encoding = 'utf-8') as f:
         commands = json.load(f)
 
     for _command, _arguments in commands.items():
-        try:
-            proc = subprocess.run([_command] + _arguments,
-                                stdout = subprocess.PIPE,
-                                stderr = subprocess.PIPE,
-                                check = True)
-            utils.info(f"{Path(__file__).name} : Start the execution of the command "
-                       f"subprocess.run({[_command] + _arguments})")
-            utils.info(f"{Path(__file__).name} : proc.stdout:")
-            utils.info(proc.stdout.decode(encoding = 'utf-8'))
-            utils.info(f"{Path(__file__).name} : proc.stderr:")
-            utils.info(proc.stderr.decode(encoding = 'utf-8'))
-            if proc.returncode == 0:
-                utils.info(f"{Path(__file__).name} : The execution of the command "
-                           f"subprocess.run({[_command] + _arguments}) was successful.")
-            else:
-                utils.info(f"{Path(__file__).name} : Failed to execute the command "
-                           f"subprocess.run({[_command] + _arguments})\n"
-                           f"{proc.stdout.decode(encoding = 'utf-8')} {proc.returncode}")
-                return proc.returncode
-        except subprocess.CalledProcessError:
-            return 1
+        utils.info(f"{Path(__file__).name} : Start the execution of the command "
+                    f"subprocess.run({[_command] + _arguments})")
+        proc = subprocess.run([_command] + _arguments,
+                            stdout = subprocess.PIPE,
+                            stderr = subprocess.PIPE)
+
+        utils.info(f"{Path(__file__).name} : proc.stdout:")
+        utils.info(proc.stdout.decode(encoding = 'utf-8'))
+        utils.info(f"{Path(__file__).name} : proc.stderr:")
+        utils.info(proc.stderr.decode(encoding = 'utf-8'))
+        if proc.returncode == 0:
+            utils.info(f"{Path(__file__).name} : The execution of the command "
+                        f"subprocess.run({[_command] + _arguments}) was successful.")
+        else:
+            utils.info(f"{Path(__file__).name} : Failed to execute the command "
+                        f"subprocess.run({[_command] + _arguments}). Returned {proc.returncode}.")
+            return proc.returncode
 
     return 0
 
