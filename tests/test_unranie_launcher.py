@@ -1,15 +1,18 @@
 import json
+import shutil
 import pytest
 import subprocess
 from pathlib import Path
 from typing import List
 from uranie_launcher import execution as exe
 from uranie_launcher import launcher
-from uranie_launcher import uncertainty_data
+from uranie_launcher import input_data
 from uranie_launcher import utils
 from uranie_launcher import _data_2_uranie
-from uranie_launcher import _rootlogon
 from uranie_launcher import _run_unitary
+
+from URANIE import DataServer, Sampler
+
 from . import program_tester
 
 
@@ -18,16 +21,16 @@ from . import program_tester
 #     assert my_test_fun(a, b)
 
 
-## uncertainty_data
+## input_data
 def test_distribution_uniform():
 
     lower_bound = 0
     upper_bound = 1
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
+    distribution = input_data.Inputs.DistributionUniform(lower_bound,
                                                                upper_bound)
 
     assert (
-        isinstance(distribution, uncertainty_data.Inputs.DistributionUniform) and
+        isinstance(distribution, input_data.Inputs.DistributionUniform) and
         distribution.lower_bound == lower_bound and
         distribution.upper_bound == upper_bound
         )
@@ -39,7 +42,7 @@ def test_distribution_uniform_raise_ValueError():
     upper_bound = 1
 
     with pytest.raises(ValueError) as error:
-        distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
+        distribution = input_data.Inputs.DistributionUniform(lower_bound,
                                                                    upper_bound)
     assert (
         "The upper bound have to be greater than the lower one !" in str(error.value)
@@ -52,13 +55,13 @@ def test_distribution_truncated_normal():
     upper_bound = 1
     mean = 1
     standard_deviation = 0.05
-    distribution = uncertainty_data.Inputs.DistributionTruncatedNormal(lower_bound,
+    distribution = input_data.Inputs.DistributionTruncatedNormal(lower_bound,
                                                                        upper_bound,
                                                                        mean,
                                                                        standard_deviation)
 
     assert (
-        isinstance(distribution, uncertainty_data.Inputs.DistributionTruncatedNormal) and
+        isinstance(distribution, input_data.Inputs.DistributionTruncatedNormal) and
         distribution.lower_bound == lower_bound and
         distribution.upper_bound == upper_bound and
         distribution.mean == mean and
@@ -74,7 +77,7 @@ def test_distribution_truncated_normal_raise_ValueError():
     standard_deviation = 0.05
 
     with pytest.raises(ValueError) as error:
-        distribution = uncertainty_data.Inputs.DistributionTruncatedNormal(lower_bound,
+        distribution = input_data.Inputs.DistributionTruncatedNormal(lower_bound,
                                                                            upper_bound,
                                                                            mean,
                                                                            standard_deviation)
@@ -88,22 +91,22 @@ def test_one_input():
     variable_name = "variable_1"
     lower_bound = 0
     upper_bound = 1
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
+    distribution = input_data.Inputs.DistributionUniform(lower_bound,
                                                                upper_bound)
 
-    input_1 = uncertainty_data.Inputs.Input(variable_name,
+    input_1 = input_data.Inputs.Input(variable_name,
                                             distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(input_1)
 
     assert (
-        isinstance(inputs, uncertainty_data.Inputs) and
+        isinstance(inputs, input_data.Inputs) and
         isinstance(inputs.inputs, List) and
         len(inputs.inputs) == 1 and
-        isinstance(inputs.inputs[0], uncertainty_data.Inputs.Input) and
+        isinstance(inputs.inputs[0], input_data.Inputs.Input) and
         inputs.inputs[0] == input_1 and
-        isinstance(inputs.inputs[0].distribution, uncertainty_data.Inputs.DistributionUniform) and
+        isinstance(inputs.inputs[0].distribution, input_data.Inputs.DistributionUniform) and
         inputs.inputs[0].variable_name == variable_name and
         inputs.inputs[0].distribution.lower_bound == lower_bound and
         inputs.inputs[0].distribution.upper_bound == upper_bound and
@@ -116,7 +119,7 @@ def test_two_input():
     variable_name_1 = "variable_1"
     lower_bound_1 = 0
     upper_bound_1 = 1
-    distribution_1 = uncertainty_data.Inputs.DistributionUniform(lower_bound_1,
+    distribution_1 = input_data.Inputs.DistributionUniform(lower_bound_1,
                                                                  upper_bound_1)
 
     variable_name_2 = "variable_2"
@@ -124,34 +127,34 @@ def test_two_input():
     upper_bound_2 = 1
     mean = 1
     standard_deviation = 0.05
-    distribution_2 = uncertainty_data.Inputs.DistributionTruncatedNormal(lower_bound_2,
+    distribution_2 = input_data.Inputs.DistributionTruncatedNormal(lower_bound_2,
                                                                          upper_bound_2,
                                                                          mean,
                                                                          standard_deviation)
 
-    input_1 = uncertainty_data.Inputs.Input(variable_name_1,
+    input_1 = input_data.Inputs.Input(variable_name_1,
                                             distribution_1)
 
-    input_2 = uncertainty_data.Inputs.Input(variable_name_2,
+    input_2 = input_data.Inputs.Input(variable_name_2,
                                             distribution_2)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(input_1)
     inputs.add_input(input_2)
 
     assert (
         isinstance(inputs.inputs, List) and
         len(inputs.inputs) == 2 and
-        isinstance(inputs.inputs[0], uncertainty_data.Inputs.Input) and
+        isinstance(inputs.inputs[0], input_data.Inputs.Input) and
         inputs.inputs[0] == input_1 and
-        isinstance(inputs.inputs[0].distribution, uncertainty_data.Inputs.DistributionUniform) and
+        isinstance(inputs.inputs[0].distribution, input_data.Inputs.DistributionUniform) and
         inputs.inputs[0].variable_name == variable_name_1 and
         inputs.inputs[0].distribution.lower_bound == lower_bound_1 and
         inputs.inputs[0].distribution.upper_bound == upper_bound_1 and
         inputs.inputs[0].flag == "@" + variable_name_1 +"@" and
-        isinstance(inputs.inputs[1], uncertainty_data.Inputs.Input) and
+        isinstance(inputs.inputs[1], input_data.Inputs.Input) and
         inputs.inputs[1] == input_2 and
-        isinstance(inputs.inputs[1].distribution, uncertainty_data.Inputs.DistributionTruncatedNormal) and
+        isinstance(inputs.inputs[1].distribution, input_data.Inputs.DistributionTruncatedNormal) and
         inputs.inputs[1].variable_name == variable_name_2 and
         inputs.inputs[1].distribution.lower_bound == lower_bound_2 and
         inputs.inputs[1].distribution.upper_bound == upper_bound_2 and
@@ -163,7 +166,7 @@ def test_two_input():
 
 def test_file_flag():
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     scenario_flag_filename = "some/path/to/uranie_tag_input.xml"
     inputs.set_file_flag(scenario_flag_filename)
 
@@ -176,11 +179,11 @@ def test_propagation():
 
     sampling_method = "name_of_sampling_method"
     sample_size = 4
-    propagation = uncertainty_data.Propagation(sampling_method,
+    propagation = input_data.Propagation(sampling_method,
                                                sample_size)
 
     assert (
-        isinstance(propagation, uncertainty_data.Propagation) and
+        isinstance(propagation, input_data.Propagation) and
         propagation.sampling_method == sampling_method and
         propagation.sample_size == sample_size
         )
@@ -192,7 +195,7 @@ def test_sample_size_zero_raises_value_error():
     sample_size = 0
 
     with pytest.raises(ValueError) as error:
-        propagation = uncertainty_data.Propagation(sampling_method,
+        propagation = input_data.Propagation(sampling_method,
                                                    sample_size)
     assert (
         "sample_size must be greater than 0" in str(error.value)
@@ -202,11 +205,14 @@ def test_sample_size_zero_raises_value_error():
 def test_one_output(headers):
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    filename = "filename"
+    output = input_data.Outputs.Output(filename=filename,
+                                       headers=headers,
+                                       quantity_of_interest=quantity_of_interest)
 
     assert (
-        isinstance(output, uncertainty_data.Outputs.Output) and
+        isinstance(output, input_data.Outputs.Output) and
+        output.filename == filename and
         output.headers == headers and
         output.quantity_of_interest == quantity_of_interest
         )
@@ -215,18 +221,17 @@ def test_one_output(headers):
 def test_outputs(headers):
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(headers, quantity_of_interest, "output_file")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     assert (
-        isinstance(outputs, uncertainty_data.Outputs) and
+        isinstance(outputs, input_data.Outputs) and
         outputs.name == tds_name and
         isinstance(outputs.outputs, List) and
-        isinstance(outputs.outputs[0], uncertainty_data.Outputs.Output) and
+        isinstance(outputs.outputs[0], input_data.Outputs.Output) and
         outputs.outputs[0].headers == headers and
         outputs.outputs[0].quantity_of_interest == quantity_of_interest
         )
@@ -236,27 +241,25 @@ def test_two_output(headers):
 
     headers_1 = headers
     quantity_of_interest_1 = "Temperature"
-    output_1 = uncertainty_data.Outputs.Output(headers_1,
-                                               quantity_of_interest_1)
+    output_1 = input_data.Outputs.Output(headers_1, quantity_of_interest_1, "Temperature_output")
 
     headers_2 = headers[:-1]
     quantity_of_interest_2 = "Density"
-    output_2 = uncertainty_data.Outputs.Output(headers_2,
-                                               quantity_of_interest_2)
+    output_2 = input_data.Outputs.Output(headers_2, quantity_of_interest_2, "Density_output")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output_1)
     outputs.add_output(output_2)
 
     assert (
-        isinstance(outputs, uncertainty_data.Outputs) and
+        isinstance(outputs, input_data.Outputs) and
         outputs.name == tds_name and
         isinstance(outputs.outputs, List) and
-        isinstance(outputs.outputs[0], uncertainty_data.Outputs.Output) and
+        isinstance(outputs.outputs[0], input_data.Outputs.Output) and
         outputs.outputs[0].headers == headers_1 and
         outputs.outputs[0].quantity_of_interest == quantity_of_interest_1 and
-        isinstance(outputs.outputs[1], uncertainty_data.Outputs.Output) and
+        isinstance(outputs.outputs[1], input_data.Outputs.Output) and
         outputs.outputs[1].headers == headers_2 and
         outputs.outputs[1].quantity_of_interest == quantity_of_interest_2
     )
@@ -265,19 +268,26 @@ def test_two_output(headers):
 ## execution
 def test_execution_default():
 
-    execution = exe.Execution()
+    execution = exe.Execution(working_directory=".")
 
     assert (
+        execution.working_directory == ".",
+        execution.clean == True,
+        execution.save == True,
         execution.visualization is False
     )
 
 
 def test_execution_enable_visualization():
 
-    execution = exe.Execution()
+    execution = exe.Execution(working_directory=".")
     execution.enable_visualization()
+    execution.clean_outputs(False)
+    execution.save_outputs(False)
 
     assert (
+        execution.clean == False,
+        execution.save == False,
         execution.visualization is True
     )
 
@@ -285,7 +295,7 @@ def test_execution_enable_visualization():
 def test_execution_local():
 
     nb_jobs = 2
-    execution = exe.ExecutionLocal(nb_jobs)
+    execution = exe.ExecutionLocal(working_directory="test_execution_local", nb_jobs=nb_jobs)
 
     assert (
         execution.visualization is False and
@@ -444,20 +454,19 @@ def test_all_output_when_log_level_set_to_debug(capsys):
 def test_create_data_server(headers):
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(headers, quantity_of_interest, "output_file")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     t_data_server = _data_2_uranie.create_data_server(outputs)
 
     assert (
-        isinstance(t_data_server, _rootlogon.DataServer.TDataServer) and
-        str(t_data_server) == f"Name: {tds_name} Title: Quantities: ['{quantity_of_interest}']" and
+        isinstance(t_data_server, DataServer.TDataServer) and
+        str(t_data_server) == f"Name: {tds_name} Title: Quantities = ['{quantity_of_interest}']" and
         t_data_server.GetName() == tds_name and
-        t_data_server.GetTitle() == f"Quantities: ['{quantity_of_interest}']"
+        t_data_server.GetTitle() == f"Quantities = ['{quantity_of_interest}']"
     )
 
 
@@ -466,24 +475,23 @@ def test_set_inputs_distribution_uniform(headers): #FIXME : Could be a better te
     variable_name = "variable_1"
     lower_bound = 0
     upper_bound = 1
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
+    distribution = input_data.Inputs.DistributionUniform(lower_bound,
                                                                upper_bound)
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
+    _input = input_data.Inputs.Input(variable_name,
                                            distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(_input)
 
     scenario_flag_filename = Path(__file__).absolute().parent / "tag_input_for_tests.json"
     inputs.set_file_flag(scenario_flag_filename)
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(headers, quantity_of_interest, "output_file")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     t_data_server = _data_2_uranie.create_data_server(outputs)
@@ -491,7 +499,7 @@ def test_set_inputs_distribution_uniform(headers): #FIXME : Could be a better te
     _data_2_uranie.set_inputs(inputs, t_data_server)
 
     assert (
-        isinstance(t_data_server.getAttribute(variable_name), _rootlogon.DataServer.TUniformDistribution) and
+        isinstance(t_data_server.getAttribute(variable_name), DataServer.TUniformDistribution) and
         str(t_data_server.getAttribute(variable_name)) == f"Name: {variable_name} Title: {variable_name}" and
         t_data_server.getAttribute(variable_name).GetName() == variable_name and
         t_data_server.getAttribute(variable_name).GetTitle() == variable_name and
@@ -508,26 +516,25 @@ def test_set_inputs_distribution_truncated_normal(headers): #FIXME : Could be a 
     upper_bound = 1
     mean = 1
     standard_deviation = 0.05
-    distribution = uncertainty_data.Inputs.DistributionTruncatedNormal(lower_bound,
+    distribution = input_data.Inputs.DistributionTruncatedNormal(lower_bound,
                                                                        upper_bound,
                                                                        mean,
                                                                        standard_deviation)
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
+    _input = input_data.Inputs.Input(variable_name,
                                            distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(_input)
 
     scenario_flag_filename = Path(__file__).absolute().parent / "tag_input_for_tests.json"
     inputs.set_file_flag(scenario_flag_filename)
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(headers, quantity_of_interest, "output_file")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     t_data_server = _data_2_uranie.create_data_server(outputs)
@@ -535,7 +542,7 @@ def test_set_inputs_distribution_truncated_normal(headers): #FIXME : Could be a 
     _data_2_uranie.set_inputs(inputs, t_data_server)
 
     assert (
-        isinstance(t_data_server.getAttribute(variable_name), _rootlogon.DataServer.TNormalDistribution) and
+        isinstance(t_data_server.getAttribute(variable_name), DataServer.TNormalDistribution) and
         str(t_data_server.getAttribute(variable_name)) == f"Name: {variable_name} Title: {variable_name}" and
         t_data_server.getAttribute(variable_name).GetName() == variable_name and
         t_data_server.getAttribute(variable_name).GetTitle() == variable_name and
@@ -550,20 +557,19 @@ def test_set_inputs_distribution_truncated_normal(headers): #FIXME : Could be a 
 def test_set_inputs_raise_ValueError(headers):
 
     variable_name = "variable_1"
-    distribution = uncertainty_data.Inputs.Distribution()
+    distribution = input_data.Inputs.Distribution()
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
+    _input = input_data.Inputs.Input(variable_name,
                                            distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(_input)
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(headers, quantity_of_interest, "output_file")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     t_data_server = _data_2_uranie.create_data_server(outputs)
@@ -580,21 +586,20 @@ def test_generate_sample_with_sobol(headers): #FIXME : Could be a better test...
     variable_name = "variable_1"
     lower_bound = 0
     upper_bound = 1
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
+    distribution = input_data.Inputs.DistributionUniform(lower_bound,
                                                                upper_bound)
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
+    _input = input_data.Inputs.Input(variable_name,
                                            distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(_input)
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(headers, quantity_of_interest, "output_file")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     t_data_server = _data_2_uranie.create_data_server(outputs)
@@ -605,18 +610,19 @@ def test_generate_sample_with_sobol(headers): #FIXME : Could be a better test...
 
     sampling_method = "Sobol"
     sample_size = 4
-    propagation = uncertainty_data.Propagation(sampling_method,
+    propagation = input_data.Propagation(sampling_method,
                                                sample_size)
 
     output_dirname = Path("some/path/to/output_dirname")
-    sampler = _data_2_uranie.generate_sample(propagation,
-                                             t_data_server,
-                                             output_dirname)
+    sampler = _data_2_uranie.generate_sample(propagation=propagation,
+                                             outputs=outputs,
+                                             t_data_server=t_data_server,
+                                             output_directory=output_dirname)
 
     # print("sampler.printLog() :", sampler.printLog())
 
     assert (
-        isinstance(sampler, _rootlogon.Sampler.TQMC) and
+        isinstance(sampler, Sampler.TQMC) and
         sampler.getTDS() == t_data_server and
         sampler.getMethodName() == "qMC_sobol" and
         sampler.GetName() == f"Sampling_qMC_{sampling_method.lower()}_{sample_size}" and
@@ -629,43 +635,44 @@ def test_generate_sample_with_srs(headers): #FIXME : Could be a better test...
     variable_name = "variable_1"
     lower_bound = 0
     upper_bound = 1
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
+    distribution = input_data.Inputs.DistributionUniform(lower_bound,
                                                                upper_bound)
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
+    _input = input_data.Inputs.Input(variable_name,
                                            distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(_input)
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    filename="sample_with_srs"
+    output = input_data.Outputs.Output(filename=filename,
+                                       headers=headers,
+                                       quantity_of_interest=quantity_of_interest)
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     t_data_server = _data_2_uranie.create_data_server(outputs)
 
     _data_2_uranie.set_inputs(inputs, t_data_server)
 
-
-
     sampling_method = "SRS"
     sample_size = 4
-    propagation = uncertainty_data.Propagation(sampling_method,
+    propagation = input_data.Propagation(sampling_method,
                                                sample_size)
 
     output_dirname = Path("some/path/to/output_dirname")
-    sampler = _data_2_uranie.generate_sample(propagation,
-                                             t_data_server,
-                                             output_dirname)
+    sampler = _data_2_uranie.generate_sample(propagation=propagation,
+                                             outputs=outputs,
+                                             t_data_server=t_data_server,
+                                             output_directory=output_dirname)
 
     # print("sampler.printLog() :", sampler.printLog())
 
     assert (
-        isinstance(sampler, _rootlogon.Sampler.TSampling) and
+        isinstance(sampler, Sampler.TSampling) and
         sampler.getTDS() == t_data_server and
         sampler.getMethodName() == sampling_method and
         sampler.GetName() == f"Sampling_{sampling_method.lower()}_{sample_size}" and
@@ -678,21 +685,20 @@ def test_generate_sample_raise_ValueError(headers):
     variable_name = "variable_1"
     lower_bound = 0
     upper_bound = 1
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
+    distribution = input_data.Inputs.DistributionUniform(lower_bound,
                                                                upper_bound)
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
+    _input = input_data.Inputs.Input(variable_name,
                                            distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(_input)
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(headers, quantity_of_interest, "output_file")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     t_data_server = _data_2_uranie.create_data_server(outputs)
@@ -701,15 +707,16 @@ def test_generate_sample_raise_ValueError(headers):
 
     sampling_method = "wrong_methode"
     sample_size = 4
-    propagation = uncertainty_data.Propagation(sampling_method,
+    propagation = input_data.Propagation(sampling_method,
                                                sample_size)
 
     output_dirname = Path("some/path/to/output_dirname")
 
     with pytest.raises(ValueError) as error:
-        sampler = _data_2_uranie.generate_sample(propagation,
-                                                 t_data_server,
-                                                 output_dirname)
+        _data_2_uranie.generate_sample(propagation=propagation,
+                                       outputs=outputs,
+                                       t_data_server=t_data_server,
+                                       output_directory=output_dirname)
     assert (
         f"Unknown sampling method: {propagation.sampling_method}" in str(error.value)
     )
@@ -734,31 +741,17 @@ def test_generate_sample_raise_ValueError(headers):
 def test_set_outputs(headers): #FIXME : Could be a better test...
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output_filename = "output_file"
+    output = input_data.Outputs.Output(headers, quantity_of_interest, output_filename)
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
-    unitary_result_filename = "unitary_aggregated_outputs.dat"
+    t_output_files = _data_2_uranie.set_outputs(outputs)
 
-    t_output_file, headers = _data_2_uranie.set_outputs(outputs,
-                                                        unitary_result_filename)
-
-    assert (
-        headers == [
-        'initial_value',
-        'halftime_value',
-        'final_value',
-        'average_value',
-        'cumulative_value',
-        'minimum_value',
-        'maximum_value'
-        ] and
-        str(t_output_file) == f"Name: {unitary_result_filename} Title: TCodeFile with name[{unitary_result_filename}]"
-        # test for the header set to the t_output_file...
-    )
+    assert (str(t_output_files[0]) ==
+            f"Name: {output_filename} Title: TCodeFile with name[{output_filename}]")
 
 
 def test_create_launcher(headers, commands_to_execute):
@@ -766,24 +759,23 @@ def test_create_launcher(headers, commands_to_execute):
     variable_name = "variable_1"
     lower_bound = 0
     upper_bound = 1
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
+    distribution = input_data.Inputs.DistributionUniform(lower_bound,
                                                                upper_bound)
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
+    _input = input_data.Inputs.Input(variable_name,
                                            distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(_input)
 
     scenario_flag_filename = Path(__file__).absolute().parent / "tag_input_for_tests.json"
     inputs.set_file_flag(scenario_flag_filename)
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(headers, quantity_of_interest, "output_file")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     t_data_server = _data_2_uranie.create_data_server(outputs)
@@ -792,54 +784,45 @@ def test_create_launcher(headers, commands_to_execute):
 
     sampling_method = "Sobol"
     sample_size = 4
-    propagation = uncertainty_data.Propagation(sampling_method,
+    propagation = input_data.Propagation(sampling_method,
                                                sample_size)
 
-    output_dirname = Path(__file__).absolute().parent / "results"
-    sampler = _data_2_uranie.generate_sample(propagation,
-                                             t_data_server,
-                                             output_dirname)
+    output_dirname = Path(__file__).absolute().parent / "test_create_launcher"
+    output_dirname.mkdir(parents=True, exist_ok=True)
 
-    unitary_result_filename = "unitary_aggregated_outputs.dat"
-    t_output_file, _headers = _data_2_uranie.set_outputs(outputs,
-                                                         unitary_result_filename)
+    _data_2_uranie.generate_sample(propagation=propagation,
+                                   outputs=outputs,
+                                   t_data_server=t_data_server,
+                                   output_directory=output_dirname)
 
-    t_launcher, uranie_work_dir = _data_2_uranie.create_launcher(commands_to_execute,
-                                                                 t_data_server,
-                                                                 output_dirname,
-                                                                 t_output_file)
+    t_output_files = _data_2_uranie.set_outputs(outputs)
 
-    assert (
-        uranie_work_dir == Path(__file__).absolute().parent / "results/uranie_unitaries" and
-        t_launcher.getWorkingDirectory() == str(uranie_work_dir) and
-        t_launcher.getSave() == True and
-        t_launcher.getClean() == True
-    )
+    _data_2_uranie.create_launcher(commands_to_execute,
+                                   t_data_server,
+                                   output_dirname,
+                                   t_output_files)
 
 
-def test_run_calculation_local(headers, commands_to_execute): #FIXME : Could be a better test...
+def test_run_calculation_local(commands_to_execute): #FIXME : Could be a better test...
 
     variable_name = "variable_1"
     lower_bound = 0
     upper_bound = 1
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
-                                                               upper_bound)
+    distribution = input_data.Inputs.DistributionUniform(lower_bound, upper_bound)
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
-                                           distribution)
+    _input = input_data.Inputs.Input(variable_name, distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(_input)
 
     scenario_flag_filename = Path(__file__).absolute().parent / "tag_input_for_tests.json"
     inputs.set_file_flag(scenario_flag_filename)
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(["pi"], quantity_of_interest, "result")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     t_data_server = _data_2_uranie.create_data_server(outputs)
@@ -848,28 +831,34 @@ def test_run_calculation_local(headers, commands_to_execute): #FIXME : Could be 
 
     sampling_method = "Sobol"
     sample_size = 4
-    propagation = uncertainty_data.Propagation(sampling_method,
-                                               sample_size)
+    propagation = input_data.Propagation(sampling_method, sample_size)
 
-    output_dirname = Path(__file__).absolute().parent / "results"
-    sampler = _data_2_uranie.generate_sample(propagation,
-                                             t_data_server,
-                                             output_dirname)
+    output_dirname = Path(__file__).absolute().parent / "test_run_calculation_local"
+    output_dirname.mkdir(parents=True, exist_ok=True)
+    _data_2_uranie.generate_sample(propagation=propagation,
+                                   outputs=outputs,
+                                   t_data_server=t_data_server,
+                                   output_directory=output_dirname)
 
-    unitary_result_filename = "unitary_aggregated_outputs.dat"
-    t_output_file, _headers = _data_2_uranie.set_outputs(outputs,
-                                                         unitary_result_filename)
+    t_output_files = _data_2_uranie.set_outputs(outputs)
 
-    t_launcher, uranie_work_dir = _data_2_uranie.create_launcher(commands_to_execute,
-                                                                 t_data_server,
-                                                                 output_dirname,
-                                                                 t_output_file)
+    print(commands_to_execute)
+    t_launcher = _data_2_uranie.create_launcher(commands_to_execute,
+                                                t_data_server,
+                                                output_dirname,
+                                                t_output_files)
 
-    nb_jobs = 2
-    execution = exe.ExecutionLocal(nb_jobs)
+    execution = exe.ExecutionLocal(working_directory=output_dirname / "unitary", nb_jobs=2)
 
-    _data_2_uranie.run_calculations(execution,
-                                    t_launcher)
+    _data_2_uranie.run_calculations(execution=execution,
+                                    t_launcher=t_launcher,
+                                    output_directory=output_dirname)
+
+    assert (
+        t_launcher.getWorkingDirectory() == str(output_dirname / "unitary") and
+        t_launcher.getSave() == True and
+        t_launcher.getClean() == True
+    )
 
     assert (
         True
@@ -879,26 +868,25 @@ def test_run_calculation_local(headers, commands_to_execute): #FIXME : Could be 
 def test_run_calculation_raise_Value_Error(headers, commands_to_execute):
 
     variable_name = "variable_1"
-    lower_bound = 0
-    upper_bound = 1
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
+    lower_bound = 100
+    upper_bound = 500
+    distribution = input_data.Inputs.DistributionUniform(lower_bound,
                                                                upper_bound)
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
+    _input = input_data.Inputs.Input(variable_name,
                                            distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(_input)
 
     scenario_flag_filename = Path(__file__).absolute().parent / "tag_input_for_tests.json"
     inputs.set_file_flag(scenario_flag_filename)
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(headers, quantity_of_interest, "output_file")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     t_data_server = _data_2_uranie.create_data_server(outputs)
@@ -907,28 +895,35 @@ def test_run_calculation_raise_Value_Error(headers, commands_to_execute):
 
     sampling_method = "Sobol"
     sample_size = 4
-    propagation = uncertainty_data.Propagation(sampling_method,
+    propagation = input_data.Propagation(sampling_method,
                                                sample_size)
 
-    output_dirname = Path(__file__).absolute().parent / "results"
-    sampler = _data_2_uranie.generate_sample(propagation,
-                                             t_data_server,
-                                             output_dirname)
+    output_dirname = Path(__file__).absolute().parent / "test_run_calculation_raise_Value_Error"
+    output_dirname.mkdir(parents=True, exist_ok=True)
+    _data_2_uranie.generate_sample(propagation=propagation,
+                                   outputs=outputs,
+                                   t_data_server=t_data_server,
+                                   output_directory=output_dirname)
 
-    unitary_result_filename = "unitary_aggregated_outputs.dat"
-    t_output_file, _headers = _data_2_uranie.set_outputs(outputs,
-                                                         unitary_result_filename)
+    t_output_files = _data_2_uranie.set_outputs(outputs)
 
-    t_launcher, uranie_work_dir = _data_2_uranie.create_launcher(commands_to_execute,
-                                                                 t_data_server,
-                                                                 output_dirname,
-                                                                 t_output_file)
+    t_launcher = _data_2_uranie.create_launcher(commands_to_execute,
+                                                t_data_server,
+                                                output_dirname,
+                                                t_output_files)
 
-    execution = exe.Execution()
 
     with pytest.raises(ValueError) as error:
-        _data_2_uranie.run_calculations(execution,
-                                        t_launcher)
+        execution = exe.Execution(working_directory=output_dirname)
+        _data_2_uranie.run_calculations(execution, t_launcher, output_dirname)
+    assert (
+        f"execution.clean is True and output_directory == "
+        "execution.working_directory is not possible." in str(error.value)
+    )
+
+    with pytest.raises(ValueError) as error:
+        execution = exe.Execution(working_directory=output_dirname / "unitary")
+        _data_2_uranie.run_calculations(execution, t_launcher, output_dirname)
     assert (
         f"Invalid execution mode: {execution.__class__.__name__}" in str(error.value)
     )
@@ -946,9 +941,10 @@ def test_save_calculations():
 def test_program_tester(): #FIXME : Could be a better test...
 
     data_filename = "./input_for_tests"
-    output_dirname = "./results"
+    output_dirname = Path(__file__).absolute().parent / "test_program_tester"
+    output_dirname.mkdir(parents=False, exist_ok=True)
 
-    program_tester.main_unitary_calculation([data_filename, output_dirname])
+    program_tester.main_unitary_calculation([data_filename, str(output_dirname)])
 
     output_dir = Path(__file__).absolute().parent / output_dirname
 
@@ -962,53 +958,47 @@ def test_run_unitary():
 
 
 ## launcher
-def test_launcher(headers, commands_to_execute): #FIXME : Could be a better test...
+def test_launcher(commands_to_execute): #FIXME : Could be a better test...
 
     variable_name = "variable_1"
     lower_bound = 100
-    upper_bound = 100000
-    distribution = uncertainty_data.Inputs.DistributionUniform(lower_bound,
-                                                               upper_bound)
+    upper_bound = 500
+    distribution = input_data.Inputs.DistributionUniform(lower_bound, upper_bound)
 
-    _input = uncertainty_data.Inputs.Input(variable_name,
-                                           distribution)
+    _input = input_data.Inputs.Input(variable_name, distribution)
 
-    inputs = uncertainty_data.Inputs()
+    inputs = input_data.Inputs()
     inputs.add_input(_input)
 
     scenario_flag_filename = Path(__file__).absolute().parent / "tag_input_for_tests.json"
     inputs.set_file_flag(scenario_flag_filename)
 
     quantity_of_interest = "Temperature"
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(["pi"], quantity_of_interest, "result")
 
     tds_name = "Name_of_t_data_server"
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     sampling_method = "Sobol"
     sample_size = 4
-    propagation = uncertainty_data.Propagation(sampling_method,
-                                               sample_size)
+    propagation = input_data.Propagation(sampling_method, sample_size)
 
-    output_dirname = Path(__file__).absolute().parent / "results"
-
-    unitary_result_filename = "unitary_aggregated_outputs.dat"
+    output_dirname = Path(__file__).absolute().parent / "test_launcher"
+    shutil.rmtree(output_dirname)
+    output_dirname.mkdir(parents=False, exist_ok=True)
 
     nb_jobs = 2
-    execution = exe.ExecutionLocal(nb_jobs)
+    execution = exe.ExecutionLocal(working_directory=output_dirname / "unitary", nb_jobs=nb_jobs)
 
-    t_data_server = launcher.execute_uranie(commands_to_execute,
-                                            inputs,
-                                            propagation,
-                                            outputs,
-                                            execution,
-                                            output_dirname,
-                                            unitary_result_filename)
+    ascii_filepath, nb_failed = launcher.execute_uranie(commands_to_execute=commands_to_execute,
+                                                        inputs=inputs,
+                                                        propagation=propagation,
+                                                        outputs=outputs,
+                                                        execution=execution,
+                                                        output_directory=output_dirname)
 
     assert (
-        isinstance(t_data_server, _rootlogon.DataServer.TDataServer) and
-        tds_name in t_data_server.GetName() and
-        t_data_server.GetTitle() == f"Quantities: ['{quantity_of_interest}']"
+        nb_failed == 0 and
+        ascii_filepath.exists()
     )

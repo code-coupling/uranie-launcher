@@ -2,7 +2,7 @@
 import pytest
 from pathlib import Path
 import sys
-from uranie_launcher import uncertainty_data
+from uranie_launcher import input_data
 from uranie_launcher import _data_2_uranie
 from uranie_launcher import _rootlogon
 
@@ -62,10 +62,9 @@ def tds_name_fixture():
 @pytest.fixture(name = 'outputs', scope='session')
 def outputs_fixture(headers, quantity_of_interest, tds_name):
 
-    output = uncertainty_data.Outputs.Output(headers,
-                                             quantity_of_interest)
+    output = input_data.Outputs.Output(tds_name, headers, quantity_of_interest)
 
-    outputs = uncertainty_data.Outputs(tds_name)
+    outputs = input_data.Outputs(tds_name)
     outputs.add_output(output)
 
     return outputs
@@ -106,8 +105,8 @@ def commands_to_execute_fixture():
     commands_to_execute = {
         sys.executable : [
              str(Path(__file__).parent / "program_tester.py"),
-            "./input_for_tests",
-            "./results",
+            "tag_input_for_tests.json",
+            ".",
             ],
         }
 

@@ -10,14 +10,14 @@ from pathlib import Path
 
 
 def _read_input_file(input_filename):
-    input_absolute_filename = Path(__file__).absolute().parent / input_filename
+    input_absolute_filename = input_filename
     with open(input_absolute_filename, 'r', encoding = 'utf-8') as input_file:
         return json.load(input_file)
 
 
 def _do_calculation(uncertain_variable):
     # approximate the value of Pi
-    n = uncertain_variable
+    n = int(uncertain_variable)
     inside_circle = 0
 
     for i in range(n):
@@ -28,14 +28,6 @@ def _do_calculation(uncertain_variable):
 
     pi = 4 * inside_circle / n
     return pi
-
-
-def _write_result(result, output_filename):
-    output_absolute_filename = Path(__file__).absolute().parent / output_filename
-    Path.mkdir(output_absolute_filename.parent, exist_ok=True)
-    with open(output_absolute_filename, 'w', encoding = 'utf-8') as output_file:
-        json.dump(result, output_file)
-
 
 def main_unitary_calculation(arguments):
     # Interpret arguments
@@ -50,13 +42,12 @@ def main_unitary_calculation(arguments):
     args = parser.parse_args(arguments)
 
     data = _read_input_file(args.data_filename)
-    uncertain_variable = data["uncertain_variable"]
+    uncertain_variable = float(data["uncertain_variable"])
 
     result = _do_calculation(uncertain_variable)
 
-    output_dirname = Path(__file__).absolute().parent / args.output_dirname
-    output_filename = output_dirname / "result"
-    _write_result(result, output_filename)
+    output_filename = Path(args.output_dirname) / "result"
+    output_filename.write_text(f"{result}", encoding = 'utf-8')
 
     return 0
 

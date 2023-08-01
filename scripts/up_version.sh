@@ -49,9 +49,12 @@ if [ ! -d "${current_script_dir}/.venv_utils" ]; then
     uranie_bash_source="/home/uranie-public/uranie-v4.7.0.bashrc"
     echo ". ${uranie_bash_source}" >> ${current_script_dir}/.venv_utils/bin/activate
 fi
+set +eu
 . ${current_script_dir}/.venv_utils/bin/activate
+set -eu
 pip install --upgrade pip setuptools tox
 
+exit 1
 # Tag the version
 echo ${version_name} > ${version_file}
 git add ${version_file}

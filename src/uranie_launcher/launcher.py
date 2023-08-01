@@ -57,7 +57,7 @@ def execute_uranie(commands_to_execute: Dict[str, List],
                                      output_directory,
                                      t_output_files)
 
-    d2u.run_calculations(execution, t_launcher)
+    d2u.run_calculations(execution, t_launcher, output_directory)
 
     ascii_filepath, nb_failed = d2u.save_calculations(propagation,
                                                       execution,

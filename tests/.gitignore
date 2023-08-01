@@ -1,5 +1,6 @@
-result*
-.uranie-unitary-commands.json
-experimental_design.dat
-uranie_unitaries
-aggregated_outputs*
+/test_create_launcher/
+/test_launcher/
+/test_program_tester/
+/test_run_calculation_local/
+/test_run_calculation_local/
+/test_run_calculation_raise_Value_Error/

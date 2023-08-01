@@ -133,7 +133,7 @@ def visualisation(t_data_server: DataServer.TDataServer):
     canvas.Draw()
 
 
-def set_outputs(outputs: input_data.Outputs) -> DataServer.TAttribute:
+def set_outputs(outputs: input_data.Outputs) -> List[Launcher.TOutputFileRow]:
     """Prepares the unitary aggregated outputs file.
 
     Parameters
@@ -143,10 +143,8 @@ def set_outputs(outputs: input_data.Outputs) -> DataServer.TAttribute:
 
     Returns
     -------
-    Launcher.TOutputFileRow
-        File that will contain the unitary aggregated outputs
-    List
-        Names of the different aggregations functions
+    List[Launcher.TOutputFileRow]
+        List of file that will contain the unitary aggregated outputs
     """
     # The output files of the code
     t_output_files = []
@@ -164,7 +162,7 @@ def create_launcher(commands_to_execute: Dict[str, List],
                     t_data_server: DataServer.TDataServer,
                     output_directory: Path,
                     t_output_files: List[Launcher.TOutputFileRow]
-                    ) -> Tuple[Launcher.TLauncher, Path]:
+                    ) -> Launcher.TLauncher:
     """Create the launcher for Uranie
 
     Parameters
@@ -201,7 +199,8 @@ def create_launcher(commands_to_execute: Dict[str, List],
 
 
 def run_calculations(execution: exe.Execution,
-                     t_launcher: Launcher.TLauncher) -> Path:
+                     t_launcher: Launcher.TLauncher,
+                     output_directory: Path) -> Path:
     """Launch the calculation according to the appropriate mode (on your desktop or on a cluster).
 
     Parameters
@@ -210,11 +209,16 @@ def run_calculations(execution: exe.Execution,
         Object containing all the infos about how to execute the calculations.
     t_launcher : Launcher.TLauncher
         t_launcher object.
+    output_directory : Path
+        Name of the directory where are stored the results
+        of the uncertainty quantification calculation
 
     Raises
     ------
     ValueError
         Invalid execution mode if it's different from 'desktop' or 'cluster'.
+    ValueError
+        execution.clean and output_directory == execution.working_directory is not possible.
     """
 
     # To back up all directories
@@ -223,6 +227,11 @@ def run_calculations(execution: exe.Execution,
 
     # Uranie working directory
     t_launcher.setWorkingDirectory(str(execution.working_directory))
+
+    if output_directory == execution.working_directory and execution.clean:
+        raise ValueError(
+            "execution.clean is True and output_directory == "
+            "execution.working_directory is not possible.")
 
     if isinstance(execution, exe.ExecutionLocal):
         if execution.nb_jobs == 1:  # Launching code on a single processor

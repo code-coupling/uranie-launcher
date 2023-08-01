@@ -24,7 +24,7 @@ def set_verbosity(log_level: int):
     global _log_level
     if not (NONE <= log_level <= DEBUG):
         raise ValueError(f"log_level must be in [{NONE};{DEBUG}]")
-    log_level = log_level
+    _log_level = log_level
 
 def get_log_level():
     """Access to current log level."""

@@ -158,7 +158,7 @@ class ExecutionSlurm(Execution):
     """Object containing the info about how to execute the calculations on a cluster using SLURM.
     """
     def __init__(self):
-        super().__init__()
+        super().__init__(working_directory="")
         # TODO implementer l'execution sur cluster
         raise NotImplementedError("Execution on cluster is not implemented yet")
 #         self._nb_of_tasks = 1
