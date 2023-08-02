@@ -18,6 +18,8 @@ def _read_input_file(input_filename):
 def _do_calculation(uncertain_variable):
     # approximate the value of Pi
     n = int(uncertain_variable)
+    if n < 250:
+        n = 0
     inside_circle = 0
 
     for i in range(n):

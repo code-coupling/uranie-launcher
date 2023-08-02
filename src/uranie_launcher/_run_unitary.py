@@ -46,15 +46,15 @@ def main_unitary(arguments):
                             stdout = subprocess.PIPE,
                             stderr = subprocess.PIPE)
 
-        utils.info(f"{Path(__file__).name} : proc.stdout:")
+        utils.info(f"{_command} : proc.stdout:")
         utils.info(proc.stdout.decode(encoding = 'utf-8'))
-        utils.info(f"{Path(__file__).name} : proc.stderr:")
+        utils.info(f"{_command} : proc.stderr:")
         utils.info(proc.stderr.decode(encoding = 'utf-8'))
         if proc.returncode == 0:
-            utils.info(f"{Path(__file__).name} : The execution of the command "
+            utils.info(f"The execution of the command "
                         f"subprocess.run({[_command] + _arguments}) was successful.")
         else:
-            utils.info(f"{Path(__file__).name} : Failed to execute the command "
+            utils.info(f"Failed to execute the command "
                         f"subprocess.run({[_command] + _arguments}). Returned {proc.returncode}.")
             return proc.returncode
 

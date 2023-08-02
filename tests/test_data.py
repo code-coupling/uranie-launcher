@@ -1,5 +1,9 @@
+"""Tests ``data`` module."""
+
 from pathlib import Path
+
 import pytest
+
 from uranie_launcher import data
 
 @pytest.fixture

@@ -118,7 +118,7 @@ def generate_sample(propagation: input_data.Propagation,
     return t_sampler
 
 
-def visualisation(t_data_server: DataServer.TDataServer):
+def visualisation(t_data_server: DataServer.TDataServer):  # pragma: no cover
     """Plot a graph if the visualization variable is equal to True
 
     Parameters
@@ -236,7 +236,7 @@ def run_calculations(execution: exe.Execution,
     if isinstance(execution, exe.ExecutionLocal):
         if execution.nb_jobs == 1:  # Launching code on a single processor
             # For display during runing
-            if execution.visualization:
+            if execution.visualization:  # pragma: no cover
                 t_launcher.setVarDraw("max:initial_power","","") # FIXME lie a integration_bench
             t_launcher.run()
         else:
@@ -273,6 +273,7 @@ def _count_of_failed_calculations(uranie_work_dir: Path, unitary_result_filename
     nb_fail = 0
     for directory in list_directories:
         uranie_results_file = uranie_work_dir / directory / unitary_result_filename
+        utils.debug(f"Check output {uranie_results_file}: {uranie_results_file.is_file()}")
         if not uranie_results_file.is_file():
             nb_fail += 1
 
@@ -318,12 +319,17 @@ def save_calculations(propagation: input_data.Propagation,
         t_data_server.exportData(
             str(ascii_filepath), "*", f"{output0.headers[0]}!={URANIE_FAILED_VALUE}")
 
+    if utils.get_log_level() >= utils.INFO:
+        t_data_server.scan()
+
     # Some failed
     if nb_fail > 0:
-        t_data_server.exportData(str(output_directory/outputs.failed_filename), "*",
-                                 f"{output0.headers[0]}=={URANIE_FAILED_VALUE}")
         utils.info(f"\033[1;31m{nb_fail} over {propagation.sample_size} calculation(s) "
                     "failed !\033[0m")
+        utils.debug(f"export failed simulations to {output_directory/outputs.failed_filename}.")
+        utils.debug(f" -> condition: {output0.headers[0]}=={URANIE_FAILED_VALUE}")
+        t_data_server.exportData(str(output_directory/outputs.failed_filename), "*",
+                                 f"{output0.headers[0]}=={URANIE_FAILED_VALUE}")
     else:
         utils.info(f"\033[1;32mAll the {propagation.sample_size} calculation(s) "
                     "have succeeded !\033[0m")

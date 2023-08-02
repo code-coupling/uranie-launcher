@@ -46,7 +46,7 @@ def execute_uranie(commands_to_execute: Dict[str, List],
 
     d2u.generate_sample(propagation, outputs, t_data_server, output_directory)
 
-    if execution.visualization:
+    if execution.visualization:  # pragma: no cover
         d2u.visualisation(t_data_server)
 
     t_output_files = d2u.set_outputs(outputs)
@@ -65,7 +65,7 @@ def execute_uranie(commands_to_execute: Dict[str, List],
                                                       t_data_server,
                                                       output_directory)
 
-    if execution.visualization:
+    if execution.visualization:  # pragma: no cover
         d2u.visualisation(t_data_server)
         input('Type Enter to quit the program...')
 
