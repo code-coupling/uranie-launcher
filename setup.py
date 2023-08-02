@@ -34,7 +34,7 @@ setup(
             'uranie-launcher-unitary=uranie_launcher._run_unitary:run_unitary',
             'test-run-unitary-calculation=tests.program_tester:run_unitary_calculation',
         ]},
-    install_requires=["numpy>=1.19.5",
+    install_requires=[
                     #   "URANIE",
                     #   "ROOT"
                       ],
