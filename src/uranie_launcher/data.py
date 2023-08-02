@@ -36,9 +36,9 @@ class Data():
                 _description_
             """
             return {
-                Data.Types.STRING: lambda value: str(value),
-                Data.Types.DOUBLE: lambda value: float(value),
-                Data.Types.VECTOR: [float(val) for val in value.strip('][').split(',')],
+                Data.Types.STRING: str,
+                Data.Types.DOUBLE: float,
+                Data.Types.VECTOR: lambda val: [float(v) for v in val.strip('][').split(',')],
             }[value_type](value)
 
 
@@ -218,7 +218,7 @@ def csv_to_data(filepath: Path) -> Data:
     Data
         Loaded data
     """
-    with filepath.open(mode='w', encoding='utf-8') as csv_file:
+    with filepath.open(mode='r', encoding='utf-8') as csv_file:
 
         matrix = []
         csv_reader = csv.reader(csv_file)
@@ -239,7 +239,7 @@ def csv_to_data(filepath: Path) -> Data:
                 units = line[1:]
             else:
                 matrix.append([Data.Types.convert(value, types[index])
-                            for index, value in enumerate(line)])
+                            for index, value in enumerate(line[1:])])
 
         data = Data(name=name,
                     description=description,
@@ -248,7 +248,7 @@ def csv_to_data(filepath: Path) -> Data:
                                         value_unit=units[index])
                             for index, name in enumerate(names)])
         for values in matrix:
-            data.add_values(values[1:])
+            data.add_values(values)
         return data
 
 
@@ -324,8 +324,8 @@ def data_to_ascii(data: Data, filepath: Path):
 #COLUMN_TITLES: {'|'.join(data.names)}
 #COLUMN_UNITS: {'|'.join(data.units)}
 
-""" + "\n".join([" ".join([str(values[index]) for values in data.values])
-                     for index in range(data.nb_rows)]), encoding='utf-8')
+""" + "\n".join([" ".join([str(values[index]).replace(' ', '') for values in data.values])
+                     for index in range(data.nb_rows)]) + "\n", encoding='utf-8')
 
 def ascii_to_data(filepath: Path) -> Data:
     """Convert 'Salome Table' as defined by Uranie to ``Data``.
@@ -366,11 +366,14 @@ def ascii_to_data(filepath: Path) -> Data:
             units = [n.strip() for n in line.replace('#COLUMN_UNITS:', '').strip().split('|')]
         else:
             if types:
+                print(line.split())
                 matrix.append([Data.Types.convert(value, types[index])
                                for index, value in enumerate(line.split())])
             else:
                 matrix.append([float(value) for value in line.split()])
 
+    if not names:
+        names = [str(index) for index, _ in enumerate(matrix[0])]
     if not types:
         types = ["D"] * len(names)
     if not units:

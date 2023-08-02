@@ -806,8 +806,8 @@ def test_create_launcher(headers, commands_to_execute):
 def test_run_calculation_local(commands_to_execute): #FIXME : Could be a better test...
 
     variable_name = "variable_1"
-    lower_bound = 0
-    upper_bound = 1
+    lower_bound = 100
+    upper_bound = 1000
     distribution = input_data.Inputs.DistributionUniform(lower_bound, upper_bound)
 
     _input = input_data.Inputs.Input(variable_name, distribution)
