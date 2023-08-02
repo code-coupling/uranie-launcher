@@ -54,7 +54,6 @@ set +eu
 set -eu
 pip install --upgrade pip setuptools tox
 
-exit 1
 # Tag the version
 echo ${version_name} > ${version_file}
 git add ${version_file}
