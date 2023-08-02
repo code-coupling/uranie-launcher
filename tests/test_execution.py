@@ -8,49 +8,52 @@ from uranie_launcher import execution
 
 ## execution
 def test_execution_default():
+    """test exec default"""
 
-    exec = execution.Execution(working_directory=".")
+    exe = execution.Execution(working_directory=".")
 
     assert (
-        exec.working_directory == "." and
-        exec.clean == True and
-        exec.save == -1 and
-        exec.visualization is False
+        exe.working_directory == "." and
+        exe.clean is True and
+        exe.save == -1 and
+        exe.visualization is False
     )
 
 
 def test_execution_enable_visualization():
+    """test exec enable visualization"""
 
-    exec = execution.Execution(working_directory=".")
-    exec.enable_visualization()
-    exec.clean_outputs(False)
-    exec.save_outputs(0)
+    exe = execution.Execution(working_directory=".")
+    exe.enable_visualization()
+    exe.clean_outputs(False)
+    exe.save_outputs(0)
 
     assert (
-        exec.clean == False and
-        exec.save == 0 and
-        exec.visualization is True
+        exe.clean is False and
+        exe.save == 0 and
+        exe.visualization is True
     )
 
 
 def test_execution_local():
-
+    """test local exec"""
 
     with pytest.raises(ValueError) as error:
-        exec = exec = execution.ExecutionLocal(working_directory=".", nb_jobs=0)
+        execution.ExecutionLocal(working_directory=".", nb_jobs=0)
     assert "nb_jobs' (0) must be >=1." in str(error.value)
 
     nb_jobs = 2
-    exec = execution.ExecutionLocal(working_directory="test_execution_local", nb_jobs=nb_jobs)
+    exe = execution.ExecutionLocal(working_directory="test_execution_local", nb_jobs=nb_jobs)
 
     assert (
-        exec.visualization is False and
-        exec.nb_jobs == nb_jobs
+        exe.visualization is False and
+        exe.nb_jobs == nb_jobs
     )
 
 
-def test_execution_slurm_raise_NotImplementedError():
+def test_execution_slurm_raise():
+    """test slurm exec"""
 
     with pytest.raises(NotImplementedError) as error:
-        exec = execution.ExecutionSlurm()
+        execution.ExecutionSlurm()
     assert "Execution on cluster is not implemented yet" in str(error.value)

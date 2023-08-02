@@ -82,7 +82,6 @@ class Data():
                             f"Element of vector is not correct: found {type(val)},"
                             f"expected float for '{var_name}' at row {row_index}, element {elt}.")
 
-
     class Header:
         """Class defining data header"""
 
@@ -116,7 +115,6 @@ class Data():
         def value_unit(self) -> str:
             """unit of the variable"""
             return self._value_unit
-
 
     def __init__(self, name: str, description: str, headers: List['Data.Header']):
         """Constructor.
@@ -239,7 +237,7 @@ def data_to_csv(data: Data, filepath: Path):
         csv_writer.writerow(["COLUMN_TITLES"] + data.names)
         csv_writer.writerow(["COLUMN_UNITS"] + data.units)
         csv_writer.writerows([[index] + [str(values[index]) for values in data.values]
-                     for index in range(data.nb_rows)])
+                              for index in range(data.nb_rows)])
 
 
 def csv_to_data(filepath: Path) -> Data:
@@ -265,32 +263,32 @@ def csv_to_data(filepath: Path) -> Data:
             elif line_no == 1:
                 description = line[1]
             elif line_no == 2:
-                pass # date
+                pass  # date
             elif line_no == 3:
                 names = line[1:]
             elif line_no == 4:
                 types = line[1:]
             elif line_no == 5:
-                pass # titles
+                pass  # titles
             elif line_no == 6:
                 units = line[1:]
             else:
                 matrix.append([Data.Types.convert(value, types[index])
-                            for index, value in enumerate(line[1:])])
+                               for index, value in enumerate(line[1:])])
 
         data = Data(name=name,
                     description=description,
                     headers=[Data.Header(name=name,
-                                        value_type=types[index],
-                                        value_unit=units[index])
-                            for index, name in enumerate(names)])
+                                         value_type=types[index],
+                                         value_unit=units[index])
+                             for index, name in enumerate(names)])
         for values in matrix:
             data.add_values(values)
         return data
 
 
 def _get_date():
-    return datetime.now().strftime("%a %b %d %H:%M:%S %Y") # "Fri Oct 28 10:41:44 2016"
+    return datetime.now().strftime("%a %b %d %H:%M:%S %Y")  # "Fri Oct 28 10:41:44 2016"
 
 
 def data_to_json(data: Data, filepath: Path):
@@ -304,22 +302,23 @@ def data_to_json(data: Data, filepath: Path):
         Path to file
     """
     dico = {
-        "_metadata" :
+        "_metadata":
         {
-            "_comment" : "",
-            "date" : _get_date(),
-            "short_names" : data.names,
-            "table_description" : data.description,
-            "table_name" : data.name,
-            "types" : data.types,
-            "units" : data.units
+            "_comment": "",
+            "date": _get_date(),
+            "short_names": data.names,
+            "table_description": data.description,
+            "table_name": data.name,
+            "types": data.types,
+            "units": data.units
         },
-        "items" :
+        "items":
         [{name: values[index]
-            for name, values in zip(data.names, data.values) }
+            for name, values in zip(data.names, data.values)}
             for index in range(data.nb_rows)]
     }
     filepath.write_text(json.dumps(dico), encoding='utf-8')
+
 
 def json_to_data(filepath: Path) -> Data:
     """Convert json to ``Data``.
@@ -366,9 +365,10 @@ def data_to_ascii(data: Data, filepath: Path):
 #COLUMN_UNITS: {'|'.join(data.units)}
 
 """ + "\n".join([" ".join([str(values[index]).replace(' ', '') for values in data.values])
-                     for index in range(data.nb_rows)]) + "\n", encoding='utf-8')
+                 for index in range(data.nb_rows)]) + "\n", encoding='utf-8')
 
-def ascii_to_data(filepath: Path) -> Data:  # pylint: disable=too-many-branches
+
+def ascii_to_data(filepath: Path) -> Data:  # pylint: disable=too-many-branches  # noqa: C901
     """Convert 'Salome Table' as defined by Uranie to ``Data``.
 
     Parameters
@@ -406,12 +406,9 @@ def ascii_to_data(filepath: Path) -> Data:  # pylint: disable=too-many-branches
         elif line.startswith("#COLUMN_UNITS:"):
             units = [n.strip() for n in line.replace('#COLUMN_UNITS:', '').strip().split('|')]
         else:
-            if types:
-                print(line.split())
-                matrix.append([Data.Types.convert(value, types[index])
-                               for index, value in enumerate(line.split())])
-            else:
-                matrix.append([float(value) for value in line.split()])
+            matrix.append([Data.Types.convert(value, types[index])
+                           for index, value in enumerate(line.split())] if types else
+                          [float(value) for value in line.split()])
 
     if not names:
         names = [str(index) for index, _ in enumerate(matrix[0])]

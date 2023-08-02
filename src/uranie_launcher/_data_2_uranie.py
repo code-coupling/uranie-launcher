@@ -60,11 +60,10 @@ def set_inputs(inputs: input_data.Inputs, t_data_server: DataServer.TDataServer)
         elif isinstance(_input.distribution, input_data.Inputs.DistributionTruncatedNormal):
             mean = _input.distribution.mean
             std_dev = _input.distribution.standard_deviation
-            t_data_server.addAttribute(DataServer.TNormalDistribution(variable_name,
-                                                                                 mean,
-                                                                                 std_dev))
-            t_data_server.getAttribute(variable_name).setBounds(_input.distribution.lower_bound,
-                                                                _input.distribution.upper_bound)
+            t_data_server.addAttribute(DataServer.TNormalDistribution(
+                variable_name, mean, std_dev))
+            t_data_server.getAttribute(variable_name).setBounds(
+                _input.distribution.lower_bound, _input.distribution.upper_bound)
 
         else:
             raise ValueError("Invalid distribution type: "
@@ -183,7 +182,7 @@ def create_launcher(commands_to_execute: Dict[str, List],
         t_launcher object.
     """
     commands_json_file = output_directory / URANIE_TCODE_JSON
-    with open(commands_json_file, 'w', encoding = 'utf-8') as tcode_file:
+    with open(commands_json_file, 'w', encoding='utf-8') as tcode_file:
         json.dump(commands_to_execute, tcode_file, indent=4)
 
     command = [URANIE_TCODE_LAUNCHER, str(commands_json_file), "> log.out 2> log.err"]
@@ -237,7 +236,7 @@ def run_calculations(execution: exe.Execution,
         if execution.nb_jobs == 1:  # Launching code on a single processor
             # For display during runing
             if execution.visualization:  # pragma: no cover
-                t_launcher.setVarDraw("max:initial_power","","") # FIXME lie a integration_bench
+                t_launcher.setVarDraw("max:initial_power", "", "")  # FIXME lie a integration_bench
             t_launcher.run()
         else:
             t_launcher.run(f"localhost={execution.nb_jobs}")
@@ -325,13 +324,13 @@ def save_calculations(propagation: input_data.Propagation,
     # Some failed
     if nb_fail > 0:
         utils.info(f"\033[1;31m{nb_fail} over {propagation.sample_size} calculation(s) "
-                    "failed !\033[0m")
+                   "failed !\033[0m")
         utils.debug(f"export failed simulations to {output_directory/outputs.failed_filename}.")
         utils.debug(f" -> condition: {output0.headers[0]}=={URANIE_FAILED_VALUE}")
         t_data_server.exportData(str(output_directory/outputs.failed_filename), "*",
                                  f"{output0.headers[0]}=={URANIE_FAILED_VALUE}")
     else:
         utils.info(f"\033[1;32mAll the {propagation.sample_size} calculation(s) "
-                    "have succeeded !\033[0m")
+                   "have succeeded !\033[0m")
 
     return ascii_filepath, nb_fail

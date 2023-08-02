@@ -1,0 +1,10 @@
+#NAME: my_data_server_5
+#TITLE: Quantities = ['pi']
+#DATE: Wed Aug  2 17:04:48 2023
+#COLUMN_NAMES: nb_simu| my_data_server_5__n__iter__
+#COLUMN_TYPES: D|D
+
+5.500000000e+02 1 
+7.750000000e+02 2 
+3.250000000e+02 3 
+4.375000000e+02 4 

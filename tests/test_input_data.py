@@ -9,11 +9,11 @@ from uranie_launcher import input_data
 
 ## input_data
 def test_distribution_uniform():
+    """Test distribution"""
 
     lower_bound = 0
     upper_bound = 1
-    distribution = input_data.Inputs.DistributionUniform(lower_bound,
-                                                               upper_bound)
+    distribution = input_data.Inputs.DistributionUniform(lower_bound, upper_bound)
 
     assert (
         isinstance(distribution, input_data.Inputs.DistributionUniform) and
@@ -22,29 +22,28 @@ def test_distribution_uniform():
         )
 
 
-def test_distribution_uniform_raise_ValueError():
+def test_distribution_uniform_raise():
+    """Test distribution"""
 
     lower_bound = 2
     upper_bound = 1
 
     with pytest.raises(ValueError) as error:
-        distribution = input_data.Inputs.DistributionUniform(lower_bound,
-                                                                   upper_bound)
-    assert (
-        "The upper bound have to be greater than the lower one !" in str(error.value)
-    )
+        input_data.Inputs.DistributionUniform(lower_bound, upper_bound)
+    assert "The upper bound have to be greater than the lower one !" in str(error.value)
 
 
 def test_distribution_truncated_normal():
+    """Test distribution"""
 
     lower_bound = 0
     upper_bound = 1
     mean = 1
     standard_deviation = 0.05
     distribution = input_data.Inputs.DistributionTruncatedNormal(lower_bound,
-                                                                       upper_bound,
-                                                                       mean,
-                                                                       standard_deviation)
+                                                                 upper_bound,
+                                                                 mean,
+                                                                 standard_deviation)
 
     assert (
         isinstance(distribution, input_data.Inputs.DistributionTruncatedNormal) and
@@ -55,7 +54,8 @@ def test_distribution_truncated_normal():
         )
 
 
-def test_distribution_truncated_normal_raise_ValueError():
+def test_distribution_truncated_normal_raise():
+    """Test inputs"""
 
     lower_bound = 2
     upper_bound = 1
@@ -63,16 +63,15 @@ def test_distribution_truncated_normal_raise_ValueError():
     standard_deviation = 0.05
 
     with pytest.raises(ValueError) as error:
-        distribution = input_data.Inputs.DistributionTruncatedNormal(lower_bound,
-                                                                           upper_bound,
-                                                                           mean,
-                                                                           standard_deviation)
-    assert (
-        "The upper bound have to be greater than the lower one !" in str(error.value)
-    )
+        input_data.Inputs.DistributionTruncatedNormal(lower_bound,
+                                                      upper_bound,
+                                                      mean,
+                                                      standard_deviation)
+    assert "The upper bound have to be greater than the lower one !" in str(error.value)
 
 
 def test_one_input(simulation_variable):
+    """Test inputs"""
 
     lower_bound = 0
     upper_bound = 1
@@ -99,12 +98,12 @@ def test_one_input(simulation_variable):
 
 
 def test_two_input():
+    """Test inputs"""
 
     variable_name_1 = "variable_1"
     lower_bound_1 = 0
     upper_bound_1 = 1
-    distribution_1 = input_data.Inputs.DistributionUniform(lower_bound_1,
-                                                                 upper_bound_1)
+    distribution_1 = input_data.Inputs.DistributionUniform(lower_bound_1, upper_bound_1)
 
     variable_name_2 = "variable_2"
     lower_bound_2 = 0
@@ -112,9 +111,9 @@ def test_two_input():
     mean = 1
     standard_deviation = 0.05
     distribution_2 = input_data.Inputs.DistributionTruncatedNormal(lower_bound_2,
-                                                                         upper_bound_2,
-                                                                         mean,
-                                                                         standard_deviation)
+                                                                   upper_bound_2,
+                                                                   mean,
+                                                                   standard_deviation)
 
     input_1 = input_data.Inputs.Input(variable_name_1, distribution_1)
     input_2 = input_data.Inputs.Input(variable_name_2, distribution_2)
@@ -146,22 +145,21 @@ def test_two_input():
 
 
 def test_file_flag():
+    """Test file flag"""
 
     inputs = input_data.Inputs()
     scenario_flag_filename = "some/path/to/uranie_tag_input.xml"
     inputs.set_file_flag(scenario_flag_filename)
 
-    assert (
-        inputs.file_flag == scenario_flag_filename
-        )
+    assert inputs.file_flag == scenario_flag_filename
 
 
 def test_propagation():
+    """Test propagation"""
 
     sampling_method = "name_of_sampling_method"
     sample_size = 4
-    propagation = input_data.Propagation(sampling_method,
-                                               sample_size)
+    propagation = input_data.Propagation(sampling_method, sample_size)
 
     assert (
         isinstance(propagation, input_data.Propagation) and
@@ -171,19 +169,17 @@ def test_propagation():
 
 
 def test_sample_size_zero_raises_value_error():
-
-    sampling_method = "name_of_sampling_method"
-    sample_size = 0
+    """Test sample"""
 
     with pytest.raises(ValueError) as error:
-        propagation = input_data.Propagation(sampling_method,
-                                                   sample_size)
+        input_data.Propagation(sampling_method="name_of_sampling_method", sample_size=0)
     assert (
         "sample_size must be greater than 0" in str(error.value)
     )
 
 
 def test_one_output(headers, quantity_of_interest):
+    """Test outputs"""
 
     filename = "filename"
     output = input_data.Outputs.Output(filename=filename,
@@ -199,6 +195,7 @@ def test_one_output(headers, quantity_of_interest):
 
 
 def test_outputs(headers, quantity_of_interest, data_server_name):
+    """Test outputs"""
 
     outputs = input_data.Outputs(data_server_name)
     outputs.add_output(input_data.Outputs.Output(headers, quantity_of_interest, "output_file"))
@@ -214,6 +211,7 @@ def test_outputs(headers, quantity_of_interest, data_server_name):
 
 
 def test_two_output():
+    """Test outputs"""
 
     headers = ['toto', 'tata']
 

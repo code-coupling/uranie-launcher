@@ -6,19 +6,9 @@ import pytest
 
 from uranie_launcher import data
 
-@pytest.fixture
-def simple_data():
-    my_data = data.Data(name="test_data",
-                        description="test",
-                        headers=[data.Data.Header("x", data.Data.Types.DOUBLE, "u_x"),
-                                 data.Data.Header("y", data.Data.Types.STRING, "u_y"),
-                                 data.Data.Header("z", data.Data.Types.VECTOR, "u_z")])
-    values=[1.0, "toto", [1.0, 2.0]]
-    my_data.add_values(values=values)
-    return my_data
-
 
 def test_conversion():
+    """Test type conversion"""
 
     assert 1.0 == data.Data.Types.convert("1.0", data.Data.Types.DOUBLE)
     assert "azerty" == data.Data.Types.convert("azerty", data.Data.Types.STRING)
@@ -26,6 +16,7 @@ def test_conversion():
 
 
 def test_header():
+    """Test data header content"""
 
     header = data.Data.Header(
         name="test_header", value_type=data.Data.Types.DOUBLE, value_unit="None")
@@ -36,14 +27,15 @@ def test_header():
 
 
 def test_data(simple_data: data.Data):
+    """Test data content"""
 
     with pytest.raises(ValueError) as error:
         simple_data.add_values(values=["toto", 1.0, [1.0, 2.0]])
-    assert f"Type is not correct: found" in str(error.value)
+    assert "Type is not correct: found" in str(error.value)
 
     with pytest.raises(ValueError) as error:
         simple_data.add_values(values=[1.0, "toto", [1.0, "2.0"]])
-    assert f"Element of vector is not correct: found" in str(error.value)
+    assert "Element of vector is not correct: found" in str(error.value)
 
     assert simple_data.name == "test_data"
     assert simple_data.description == "test"
@@ -59,6 +51,7 @@ def test_data(simple_data: data.Data):
 
 
 def test_data_to_csv(simple_data: data.Data):
+    """Test conversion data <-> csv"""
 
     output_dirname = Path(__file__).absolute().parent / "test_data_to_csv"
     output_dirname.mkdir(parents=True, exist_ok=True)
@@ -81,6 +74,7 @@ def test_data_to_csv(simple_data: data.Data):
 
 
 def test_data_to_json(simple_data: data.Data):
+    """Test conversion data <-> json"""
 
     output_dirname = Path(__file__).absolute().parent / "test_data_to_json"
     output_dirname.mkdir(parents=True, exist_ok=True)
@@ -103,6 +97,7 @@ def test_data_to_json(simple_data: data.Data):
 
 
 def test_data_to_ascii(simple_data: data.Data):
+    """Test conversion data <-> ascii"""
 
     output_dirname = Path(__file__).absolute().parent / "test_data_to_ascii"
     output_dirname.mkdir(parents=True, exist_ok=True)
@@ -125,6 +120,7 @@ def test_data_to_ascii(simple_data: data.Data):
 
 
 def test_no_meta_data():
+    """Test file without meta data"""
 
     output_dirname = Path(__file__).absolute().parent / "test_no_meta_data"
     output_dirname.mkdir(parents=True, exist_ok=True)

@@ -1,37 +1,30 @@
 """ Script to emulate the unitary calculation program.
 """
 
-# ma fonction qui remplace ib-run, uranie-post-process, ...
 import argparse
 import json
+from pathlib import Path
 import random
 import sys
-from pathlib import Path
 
 
 def _read_input_file(input_filename):
     input_absolute_filename = input_filename
-    with open(input_absolute_filename, 'r', encoding = 'utf-8') as input_file:
+    with open(input_absolute_filename, 'r', encoding='utf-8') as input_file:
         return json.load(input_file)
 
 
 def _do_calculation(uncertain_variable):
     # approximate the value of Pi
-    n = int(uncertain_variable)
-    if n < 250:
-        n = 0
+    n_simu = 0 if uncertain_variable < 250 else int(uncertain_variable)
     inside_circle = 0
-
-    for i in range(n):
-        x = random.uniform(-1, 1)
-        y = random.uniform(-1, 1)
-        if x ** 2 + y ** 2 <= 1:
+    for _ in range(n_simu):
+        if random.uniform(-1, 1) ** 2 + random.uniform(-1, 1) ** 2 <= 1:
             inside_circle += 1
-
-    pi = 4 * inside_circle / n
-    return pi
+    return 4 * inside_circle / n_simu
 
 def main_unitary_calculation(arguments):
+    """Main function of the program"""
     # Interpret arguments
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -49,7 +42,7 @@ def main_unitary_calculation(arguments):
     result = _do_calculation(uncertain_variable)
 
     output_filename = Path(args.output_dirname) / "result"
-    output_filename.write_text(f"{result}", encoding = 'utf-8')
+    output_filename.write_text(f"{result}", encoding='utf-8')
 
     return 0
 

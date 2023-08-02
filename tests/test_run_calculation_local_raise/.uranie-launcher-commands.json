@@ -1,0 +1,7 @@
+{
+    "/volatile/catA/rl222169/rn/uranie/uranie-launcher/.tox/test_and_lint/bin/python": [
+        "/volatile/catA/rl222169/rn/uranie/uranie-launcher/tests/program_tester.py",
+        "tag_input_for_tests.json",
+        "."
+    ]
+}

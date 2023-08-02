@@ -1,23 +1,19 @@
-import json
-import shutil
-import pytest
-from pathlib import Path
-from typing import List
+"""Tests ``launcher`` module."""
 
-from URANIE import DataServer, Sampler
+import json
+from pathlib import Path
+import shutil
+
+import pytest
+
+from uranie_launcher import execution, input_data, launcher
 
 from . import program_tester
-
-from uranie_launcher import execution as exe
-from uranie_launcher import launcher
-from uranie_launcher import input_data
-from uranie_launcher import _data_2_uranie
-from uranie_launcher import _run_unitary
-
 
 
 ## _run_unitary
 def test_program_tester():
+    """Test test program"""
 
     output_dirname = Path(__file__).absolute().parent / "test_program_tester"
     output_dirname.mkdir(parents=False, exist_ok=True)
@@ -29,18 +25,19 @@ def test_program_tester():
 
 
     data_filepath.write_text(json.dumps({"uncertain_variable": 249}), encoding="utf-8")
-    with pytest.raises(ZeroDivisionError) as error:
+    with pytest.raises(ZeroDivisionError):
         program_tester.main_unitary_calculation([str(data_filepath), str(output_dirname)])
 
 
 def test_run_unitary():
-    pass
+    """Test unitary"""
 
 
 ## launcher
 def test_launcher(commands_to_execute,
                   data_input_inputs_distribution_uniform,
-                  data_input_outputs): #FIXME : Could be a better test...
+                  data_input_outputs):
+    """Test execute_uranie"""
 
     output_dirname = Path(__file__).absolute().parent / "test_launcher"
     if output_dirname.exists():
@@ -51,7 +48,7 @@ def test_launcher(commands_to_execute,
     propagation = input_data.Propagation(sampling_method=input_data.Propagation.SOBOL,
                                          sample_size=sample_size)
 
-    execution = exe.ExecutionLocal(
+    exe = execution.ExecutionLocal(
         working_directory=output_dirname / "unitary", nb_jobs=sample_size)
 
     ascii_filepath, nb_failed = launcher.execute_uranie(
@@ -59,7 +56,7 @@ def test_launcher(commands_to_execute,
         inputs=data_input_inputs_distribution_uniform,
         propagation=propagation,
         outputs=data_input_outputs,
-        execution=execution,
+        execution=exe,
         output_directory=output_dirname)
 
     assert (

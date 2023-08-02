@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import List
 
+
 class Inputs():
     """ Class containing all the info about all the uncertain parameters.
     """
@@ -55,7 +56,6 @@ class Inputs():
                 upper bound of the distribution
             """
             return self._upper_bound
-
 
     class DistributionTruncatedNormal(Distribution):
         """ Set the arguments needed to define a truncated normal distribution.
@@ -125,11 +125,10 @@ class Inputs():
             """
             return self._standard_deviation
 
-
     class Input():
         """ Class containing all the info about one specific parameter of the uncertain parameters.
         """
-        def __init__(self, variable_name : str, distribution: 'Inputs.Distribution'):
+        def __init__(self, variable_name: str, distribution: 'Inputs.Distribution'):
             """ Set all the info about one specific parameter of the uncertain parameters.
 
             Parameters
@@ -175,7 +174,6 @@ class Inputs():
                 flag
             """
             return f"{self._flag_delimiter}{self._variable_name}{self._flag_delimiter}"
-
 
     def __init__(self):
         self._inputs = []
@@ -322,7 +320,6 @@ class Outputs():
                 file name
             """
             return self._filename
-
 
     def __init__(self, name):
         self._outputs = []
