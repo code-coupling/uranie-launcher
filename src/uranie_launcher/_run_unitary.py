@@ -42,7 +42,7 @@ def main_unitary(arguments):
     for _command, _arguments in commands.items():
         utils.info(f"{Path(__file__).name} : Start the execution of the command "
                     f"subprocess.run({[_command] + _arguments})")
-        proc = subprocess.run([_command] + _arguments,
+        proc = subprocess.run([_command] + _arguments,  # pylint: disable=subprocess-run-check
                             stdout = subprocess.PIPE,
                             stderr = subprocess.PIPE)
 

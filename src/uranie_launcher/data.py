@@ -4,7 +4,7 @@ import csv
 from datetime import datetime
 import json
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 
 class Data():
@@ -20,26 +20,67 @@ class Data():
         VECTOR = "V"
         """Value of type ``list``."""
 
-        def convert(value: str, value_type: str):
-            """_summary_
+        @staticmethod
+        def convert(value: str, value_type: str) -> Any:
+            """Convert from string to Uranie type
 
             Parameters
             ----------
             value : str
-                _description_
+                Value as string.
             value_type : str
-                _description_
+                Type of the value
 
             Returns
             -------
-            _type_
-                _description_
+            Any
+                Value casted as expected type
             """
             return {
                 Data.Types.STRING: str,
                 Data.Types.DOUBLE: float,
                 Data.Types.VECTOR: lambda val: [float(v) for v in val.strip('][').split(',')],
             }[value_type](value)
+
+        @staticmethod
+        def check_type(value: Any, value_type: str, var_name: str, row_index: int):
+            """Check the type of a value.
+
+            Parameters
+            ----------
+            value : Any
+                Value to test
+            value_type : str
+                Uranie ``Data.Types``
+            var_name : str
+                Name associated to the variable
+            row_index : int
+                Row in the Data
+
+            Raises
+            ------
+            ValueError
+                The type is not in ``Data.Types``.
+            ValueError
+                The type of an element of ``Data.Types.VECTOR`` is not float.
+            """
+
+            types = {
+                Data.Types.STRING: str,
+                Data.Types.DOUBLE: (float, int),
+                Data.Types.VECTOR: list,
+            }
+            if not isinstance(value, types[value_type]):
+                raise ValueError(
+                    f"Type is not correct: found {type(value)},"
+                    f"expected {types[value_type]} for '{var_name}' at row {row_index}.")
+
+            if value_type == Data.Types.VECTOR:
+                for elt, val in enumerate(value):
+                    if not isinstance(val, float):
+                        raise ValueError(
+                            f"Element of vector is not correct: found {type(val)},"
+                            f"expected float for '{var_name}' at row {row_index}, element {elt}.")
 
 
     class Header:
@@ -154,16 +195,12 @@ class Data():
             If type is not coherent with header
         """
 
-        types = {
-            Data.Types.STRING: str,
-            Data.Types.DOUBLE: (float, int),
-            Data.Types.VECTOR: list,
-        }
-
         for index, value in enumerate(values):
-            if not isinstance(value, types[self.types[index]]):
-                raise ValueError(f"Type is not correct for index {index}: found {type(value)},"
-                                 f"expected {types[self.types[index]]} for '{self.names[index]}'.")
+            Data.Types.check_type(value=value,
+                                  value_type=self.types[index],
+                                  row_index=len(self._values[index]),
+                                  var_name=self.names[index])
+        for index, value in enumerate(values):
             self._values[index].append(value)
 
     def get_values(self, index) -> List[float or str or List[float]]:
@@ -196,7 +233,7 @@ def data_to_csv(data: Data, filepath: Path):
         csv_writer = csv.writer(csv_file)
         csv_writer.writerow(["NAME", data.name])
         csv_writer.writerow(["TITLE", data.description])
-        csv_writer.writerow(["DATE", datetime.now().strftime("%a %b %d %H:%M:%S %Y")]) # "Fri Oct 28 10:41:44 2016"
+        csv_writer.writerow(["DATE", _get_date()])
         csv_writer.writerow(["COLUMN_NAMES"] + data.names)
         csv_writer.writerow(["COLUMN_TYPES"] + data.types)
         csv_writer.writerow(["COLUMN_TITLES"] + data.names)
@@ -252,6 +289,10 @@ def csv_to_data(filepath: Path) -> Data:
         return data
 
 
+def _get_date():
+    return datetime.now().strftime("%a %b %d %H:%M:%S %Y") # "Fri Oct 28 10:41:44 2016"
+
+
 def data_to_json(data: Data, filepath: Path):
     """Convert ``Data`` to json.
 
@@ -266,7 +307,7 @@ def data_to_json(data: Data, filepath: Path):
         "_metadata" :
         {
             "_comment" : "",
-            "date" : datetime.now().strftime("%a %b %d %H:%M:%S %Y"), # "Fri Oct 28 10:41:44 2016"
+            "date" : _get_date(),
             "short_names" : data.names,
             "table_description" : data.description,
             "table_name" : data.name,
@@ -318,7 +359,7 @@ def data_to_ascii(data: Data, filepath: Path):
     filepath.write_text(f"""
 #NAME: {data.name}
 #TITLE: {data.description}
-#DATE: {datetime.now().strftime("%a %b %d %H:%M:%S %Y")}
+#DATE: {_get_date()}
 #COLUMN_NAMES: {'|'.join(data.names)}
 #COLUMN_TYPES: {'|'.join(data.types)}
 #COLUMN_TITLES: {'|'.join(data.names)}
@@ -327,7 +368,7 @@ def data_to_ascii(data: Data, filepath: Path):
 """ + "\n".join([" ".join([str(values[index]).replace(' ', '') for values in data.values])
                      for index in range(data.nb_rows)]) + "\n", encoding='utf-8')
 
-def ascii_to_data(filepath: Path) -> Data:
+def ascii_to_data(filepath: Path) -> Data:  # pylint: disable=too-many-branches
     """Convert 'Salome Table' as defined by Uranie to ``Data``.
 
     Parameters
@@ -350,7 +391,7 @@ def ascii_to_data(filepath: Path) -> Data:
     for line in filepath.read_text(encoding='utf-8').splitlines():
         if not line.strip():
             continue
-        elif line.startswith("#NAME:"):
+        if line.startswith("#NAME:"):
             name = line.replace('#NAME:', '').strip()
         elif line.startswith("#TITLE:"):
             description = line.replace('#TITLE:', '').strip()

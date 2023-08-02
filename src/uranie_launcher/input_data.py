@@ -6,7 +6,7 @@ from typing import List
 class Inputs():
     """ Class containing all the info about all the uncertain parameters.
     """
-    class Distribution():
+    class Distribution():  # pylint: disable=too-few-public-methods
         """ Class containing the info about the distribution for a specific uncertain parameter.
         """
         def __init__(self):
@@ -55,6 +55,7 @@ class Inputs():
                 upper bound of the distribution
             """
             return self._upper_bound
+
 
     class DistributionTruncatedNormal(Distribution):
         """ Set the arguments needed to define a truncated normal distribution.
@@ -124,6 +125,7 @@ class Inputs():
             """
             return self._standard_deviation
 
+
     class Input():
         """ Class containing all the info about one specific parameter of the uncertain parameters.
         """
@@ -173,6 +175,7 @@ class Inputs():
                 flag
             """
             return f"{self._flag_delimiter}{self._variable_name}{self._flag_delimiter}"
+
 
     def __init__(self):
         self._inputs = []
@@ -267,6 +270,7 @@ class Propagation():
 class Outputs():
     """ Class defining an object containing all the informations about the outputs.
     """
+
     class Output():
         """ Class containing all the info about one specific output.
         """

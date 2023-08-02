@@ -39,7 +39,11 @@ def test_data(simple_data: data.Data):
 
     with pytest.raises(ValueError) as error:
         simple_data.add_values(values=["toto", 1.0, [1.0, 2.0]])
-    assert f"Type is not correct for index 0" in str(error.value)
+    assert f"Type is not correct: found" in str(error.value)
+
+    with pytest.raises(ValueError) as error:
+        simple_data.add_values(values=[1.0, "toto", [1.0, "2.0"]])
+    assert f"Element of vector is not correct: found" in str(error.value)
 
     assert simple_data.name == "test_data"
     assert simple_data.description == "test"
