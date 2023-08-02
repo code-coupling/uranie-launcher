@@ -66,14 +66,16 @@ python3 -m pip install --upgrade ${project_root_dir}
 (cd ${project_root_dir} && tox)
 
 # Push on origin
-read -p "Do you want to push version '${version_name}' ? (yes/[no]) " answer
+read -p "Do you want to push version '${version_name}' github? (yes/[no]) " answer
 if [[ "${answer}" == "y"* ]]; then
     git push origin
     git push origin ${version_name}
+else
+    exit 0
 fi
 
 # Publish on pypi
-read -p "Do you want to publish version '${version_name}' ? (yes/[no]) " answer
+read -p "Do you want to publish version '${version_name}' on pypi? (yes/[no]) " answer
 if [[ "${answer}" == "y"* ]]; then
     if [ -d "dist" ]; then
         rm -rf dist
