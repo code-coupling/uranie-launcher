@@ -3,6 +3,7 @@
 /test_data_to_ascii/
 /test_data_to_csv/
 /test_data_to_json/
+/test_generate_sobol_sample/
 /test_launcher/
 /test_no_meta_data/
 /test_program_tester/

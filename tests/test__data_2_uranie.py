@@ -5,7 +5,7 @@ import pytest
 
 from URANIE import DataServer, Sampler
 
-from uranie_launcher import execution, input_data, _data_2_uranie
+from uranie_launcher import execution, data, input_data, _data_2_uranie
 
 ## create_data_server
 def test_create_data_server(t_data_server, data_server_name, quantity_of_interest):
@@ -75,10 +75,13 @@ def test_set_inputs_distribution_truncated_normal(t_data_server,
     )
 
 ## generate_sample
-def test_generate_sobol_sample(generate_sample, t_data_server):
+def test_generate_sobol_sample(generate_sample, t_data_server, data_input_outputs):
     """Test sobol sample"""
 
-    sampler = generate_sample(Path("some/path/to/output_dirname"),
+    output_dirname = Path(__file__).absolute().parent / "test_generate_sobol_sample"
+    output_dirname.mkdir(parents=True, exist_ok=True)
+
+    sampler = generate_sample(output_dirname,
                               t_data_server,
                               input_data.Propagation.SOBOL,
                               4)
@@ -89,6 +92,10 @@ def test_generate_sobol_sample(generate_sample, t_data_server):
         sampler.GetName() == "Sampling_qMC_sobol_4" and
         sampler.GetTitle() == "Uranie 4 sample with qMC method sobol"
     )
+
+    assert ("execution_index" in
+            data.ascii_to_data(
+                output_dirname / data_input_outputs.experimental_design_filename).names)
 
 
 def test_generate_srs_sample(generate_sample, t_data_server):

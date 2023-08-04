@@ -32,7 +32,9 @@ def create_data_server(outputs: input_data.Outputs) -> DataServer.TDataServer:
     """
 
     title = f"Quantities = {[output.quantity_of_interest for output in outputs.outputs]}"
-    return DataServer.TDataServer(outputs.name, title)
+    t_data_server = DataServer.TDataServer(outputs.name, title)
+    t_data_server.changeIteratorName("execution_index")
+    return t_data_server
 
 
 def set_inputs(inputs: input_data.Inputs, t_data_server: DataServer.TDataServer):
