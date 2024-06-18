@@ -6,8 +6,37 @@
 
 from pathlib import Path
 from typing import List, Tuple
+
+import ROOT
+
 from uranie_launcher import _data_2_uranie as d2u
 from uranie_launcher import input_data, execution as exe
+
+
+def _rootlogon():
+    """Setup done in rootlogon.py recommanded by """
+    # pylint: disable=no-member,invalid-name
+    # General graphical style
+    WHITE = 0
+
+    # PlotStyle
+    ROOT.gStyle.SetPalette(1)
+    ROOT.gStyle.SetOptDate(21)
+
+    # Legend
+    ROOT.gStyle.SetLegendBorderSize(0)
+    ROOT.gStyle.SetFillStyle(0)
+
+    # Pads
+    ROOT.gStyle.SetPadColor(WHITE)
+    ROOT.gStyle.SetTitleFillColor(WHITE)
+    ROOT.gStyle.SetStatColor(WHITE)
+
+    ROOT.PyConfig.IgnoreCommandLineOptions = False
+    ROOT.gROOT.SetBatch(True)
+
+
+_rootlogon()
 
 
 def execute_uranie(commands_to_execute: List[Tuple[str, List]],
