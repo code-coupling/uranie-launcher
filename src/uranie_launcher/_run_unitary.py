@@ -40,7 +40,7 @@ def main_unitary(arguments):
     with open(args.commands_json_file, encoding='utf-8') as f:
         commands = json.load(f)
 
-    for _command, _arguments in commands.items():
+    for _command, _arguments in commands:
         utils.info(f"{Path(__file__).name} : Start the execution of the command "
                    f"subprocess.run({[_command] + _arguments})")
         proc = subprocess.run([_command] + _arguments,  # pylint: disable=subprocess-run-check

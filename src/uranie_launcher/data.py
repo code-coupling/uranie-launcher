@@ -317,7 +317,7 @@ def data_to_json(data: Data, filepath: Path):
             for name, values in zip(data.names, data.values)}
             for index in range(data.nb_rows)]
     }
-    filepath.write_text(json.dumps(dico), encoding='utf-8')
+    filepath.write_text(json.dumps(dico, indent=2), encoding='utf-8')
 
 
 def json_to_data(filepath: Path) -> Data:

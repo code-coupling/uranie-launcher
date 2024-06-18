@@ -5,12 +5,12 @@
 """
 
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 from uranie_launcher import _data_2_uranie as d2u
 from uranie_launcher import input_data, execution as exe
 
 
-def execute_uranie(commands_to_execute: Dict[str, List],
+def execute_uranie(commands_to_execute: List[Tuple[str, List]],
                    inputs: input_data.Inputs,
                    propagation: input_data.Propagation,
                    outputs: input_data.Outputs,
@@ -20,7 +20,7 @@ def execute_uranie(commands_to_execute: Dict[str, List],
 
     Parameters
     ----------
-    commands_to_execute: Dict[str, List]
+    commands_to_execute: List[Tuple[str, List]]
         Name of the script or the command which URANIE will execute with all its arguments.
     inputs: input_data.Inputs
         Object containing all the infos about the uncertain parameters.

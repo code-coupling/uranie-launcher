@@ -64,13 +64,13 @@ def headers(quantity_of_interest):
 def commands_to_execute(tag_filename):
     """command to run"""
 
-    return {
-        sys.executable : [
+    return [
+        (sys.executable, [
              str(Path(__file__).parent / "program_tester.py"),
             tag_filename,
             ".",
-            ],
-        }
+            ]),
+        ]
 
 # Fixtures to test input data model
 @pytest.fixture(scope='session')

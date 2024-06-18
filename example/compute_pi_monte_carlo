@@ -1,3 +1,4 @@
+#!python3
 """ Script to emulate the unitary calculation program.
 """
 
@@ -16,7 +17,7 @@ def _read_input_file(input_filename):
 
 def _do_calculation(uncertain_variable):
     # approximate the value of Pi
-    n_simu = 0 if uncertain_variable < 250 else int(uncertain_variable)
+    n_simu = 0 if uncertain_variable < 100 else int(uncertain_variable)
     inside_circle = 0
     for _ in range(n_simu):
         if random.uniform(-1, 1) ** 2 + random.uniform(-1, 1) ** 2 <= 1:
@@ -37,12 +38,13 @@ def main_unitary_calculation(arguments):
     args = parser.parse_args(arguments)
 
     data = _read_input_file(args.data_filename)
-    uncertain_variable = float(data["uncertain_variable"])
+    number_of_simulations = int(data["number_of_simulations"])
 
-    result = _do_calculation(uncertain_variable)
+    result = _do_calculation(number_of_simulations)
 
-    output_filename = Path(args.output_dirname) / "result"
-    output_filename.write_text(f"{result} {result * result}", encoding='utf-8')
+    output_filename = Path(args.output_dirname) / "result.json"
+    output_filename.write_text(json.dumps({"pi": result, "pi_square": result * result}, indent=2),
+                               encoding='utf-8')
 
     return 0
 

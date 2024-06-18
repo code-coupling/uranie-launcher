@@ -3,7 +3,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 from URANIE import DataServer, Launcher, Sampler
 import ROOT
@@ -159,7 +159,7 @@ def set_outputs(outputs: input_data.Outputs) -> List[Launcher.TOutputFileRow]:
     return t_output_files
 
 
-def create_launcher(commands_to_execute: Dict[str, List],
+def create_launcher(commands_to_execute: List[Tuple[str, List]],
                     t_data_server: DataServer.TDataServer,
                     output_directory: Path,
                     t_output_files: List[Launcher.TOutputFileRow]
@@ -168,7 +168,7 @@ def create_launcher(commands_to_execute: Dict[str, List],
 
     Parameters
     ----------
-    commands_to_execute : Dict[str, List]
+    commands_to_execute: List[Tuple[str, List]]
         Name of the script or the command which URANIE will execute with all its arguments.
     t_data_server : DataServer.TDataServer
         A TDataServer object
